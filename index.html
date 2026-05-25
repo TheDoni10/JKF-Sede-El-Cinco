@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Portal institucional de la Institucion Educativa John F Kennedy - Sede El Cinco."
+    />
+    <title>Institucion Educativa John F Kennedy | Sede El Cinco</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" id="inicio">
+      <nav class="nav" aria-label="Navegacion principal">
+        <a class="brand" href="#inicio" aria-label="Inicio">
+          <span class="brand-logo" aria-label="Espacio para logo"></span>
+          <span class="brand-text">
+            <strong>John F Kennedy</strong>
+            <small>Sede El Cinco</small>
+          </span>
+        </a>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span class="sr-only">Abrir menu</span>
+        </button>
+
+        <div class="nav-links" id="site-menu">
+          <a href="#portal">Portal</a>
+          <a href="#servicios">Servicios</a>
+          <a href="#personero">Personero</a>
+          <a href="#ia">IA educativa</a>
+          <a href="#contacto">Contacto</a>
+          <a class="nav-action" href="#" title="Cambia este enlace por tu pagina de votaciones">Votaciones</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Portal institucional</p>
+          <h1 id="hero-title">Institucion Educativa John F Kennedy</h1>
+          <p>
+            Sede El Cinco, Vereda El Cinco, Vegachi, Antioquia. Un espacio digital para
+            estudiantes, familias y comunidad educativa.
+          </p>
+          <div class="hero-actions" aria-label="Accesos principales">
+            <a class="button primary" href="#portal">Entrar al portal</a>
+            <a class="button secondary" href="#contacto">Contactar sede</a>
+          </div>
+        </div>
+
+        <div class="hero-board reveal" aria-label="Imagen institucional pendiente">
+          <div class="photo-placeholder large" aria-label="Espacio para foto principal"></div>
+          <div class="hero-badge">
+            <strong>Azul rey + blanco</strong>
+            <span>Paleta institucional oscura</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-strip reveal" aria-label="Informacion rapida">
+        <article>
+          <strong>JFK</strong>
+          <span>Nombre institucional</span>
+        </article>
+        <article>
+          <strong>Sede El Cinco</strong>
+          <span>Comunidad educativa</span>
+        </article>
+        <article>
+          <strong>Vegachi</strong>
+          <span>Antioquia</span>
+        </article>
+        <article>
+          <strong>Portal escolar</strong>
+          <span>Servicios para estudiantes</span>
+        </article>
+      </section>
+
+      <section class="section" id="portal">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Portal para estudiantes</p>
+          <h2>Accesos rapidos</h2>
+          <p>
+            En esta zona puedes conectar tus paginas reales: calificaciones, horario,
+            documentos, circulares y votaciones escolares.
+          </p>
+        </div>
+
+        <div class="portal-grid">
+          <a class="portal-card reveal" href="#">
+            <span class="card-icon">01</span>
+            <h3>Ver calificaciones</h3>
+            <p>Agrega aqui el enlace al sistema donde se consultan notas y reportes.</p>
+          </a>
+          <a class="portal-card reveal" href="#">
+            <span class="card-icon">02</span>
+            <h3>Horario de clases</h3>
+            <p>Conecta esta pesta&ntilde;a con el horario actualizado por grupo o jornada.</p>
+          </a>
+          <a class="portal-card reveal" href="#">
+            <span class="card-icon">03</span>
+            <h3>Circulares y documentos</h3>
+            <p>Sube aqui PDFs, permisos, comunicados y archivos institucionales.</p>
+          </a>
+          <a class="portal-card highlight reveal" href="#">
+            <span class="card-icon">04</span>
+            <h3>Votaciones escolares</h3>
+            <p>Cambia este enlace por la pagina de votaciones que ya tienes creada.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section services-section" id="servicios">
+        <div class="section-heading compact reveal">
+          <div>
+            <p class="eyebrow">Pagina informativa</p>
+            <h2>Servicios del sitio</h2>
+          </div>
+          <p>
+            Informacion clara para estudiantes, familias, docentes y visitantes de la sede.
+          </p>
+        </div>
+
+        <div class="service-tabs reveal" role="tablist" aria-label="Servicios del portal">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="info">
+            Informacion
+          </button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="estudiantes">
+            Estudiantes
+          </button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="documentos">
+            Documentos
+          </button>
+        </div>
+
+        <article class="tab-panel reveal" data-panel="info">
+          <h3>Landing page institucional</h3>
+          <p>
+            Presenta el colegio, sus datos principales, canales de contacto, identidad visual
+            y novedades de la comunidad educativa.
+          </p>
+        </article>
+        <article class="tab-panel is-hidden reveal" data-panel="estudiantes">
+          <h3>Portal para estudiantes</h3>
+          <p>
+            Centraliza accesos importantes como calificaciones, horarios, circulares,
+            documentos y actividades de participacion escolar.
+          </p>
+        </article>
+        <article class="tab-panel is-hidden reveal" data-panel="documentos">
+          <h3>Circulares y archivos</h3>
+          <p>
+            Deja aqui enlaces a carpetas, PDFs o paginas internas para descargar comunicados
+            y formatos importantes.
+          </p>
+        </article>
+      </section>
+
+      <section class="section personero-section" id="personero">
+        <div class="personero-photo reveal">
+          <div class="photo-placeholder portrait" aria-label="Espacio para foto del personero"></div>
+        </div>
+        <div class="personero-copy reveal">
+          <p class="eyebrow">Representacion estudiantil</p>
+          <h2>Personero actual</h2>
+          <p class="personero-name">Nombre del personero actual</p>
+          <p>
+            Cambia este texto por el nombre real del personero, su grado, sus propuestas y
+            los canales donde los estudiantes puedan comunicarse con el.
+          </p>
+          <a class="button secondary" href="#">Ver propuestas</a>
+        </div>
+      </section>
+
+      <section class="section ai-section" id="ia">
+        <div class="ai-copy reveal">
+          <p class="eyebrow">Chat con IA educativa</p>
+          <h2>Apoyo para aprender</h2>
+          <p>
+            Esta seccion puede conectarse despues con un chat educativo para resolver dudas,
+            practicar temas, preparar evaluaciones y orientar tareas.
+          </p>
+        </div>
+        <div class="chat-demo reveal" aria-label="Vista previa de chat educativo">
+          <div class="message bot">Hola, soy el asistente educativo de la sede.</div>
+          <div class="message user">Necesito ayuda con mi horario y una tarea.</div>
+          <div class="message bot">Claro. Puedo ayudarte a organizar la informacion paso a paso.</div>
+          <div class="chat-input">
+            <span>Escribe tu pregunta...</span>
+            <button type="button" aria-label="Enviar mensaje">Enviar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact-section" id="contacto">
+        <div class="contact-copy reveal">
+          <p class="eyebrow">Contacto</p>
+          <h2>Institucion Educativa John F Kennedy - Sede El Cinco</h2>
+          <address>
+            <strong>Direccion</strong>
+            <span>Vereda El Cinco, Vegachi, Antioquia</span>
+            <strong>Correo</strong>
+            <a href="mailto:redes.johnfkennedy@gmail.com">redes.johnfkennedy@gmail.com</a>
+            <strong>Telefono</strong>
+            <span>Agrega aqui el telefono de contacto</span>
+          </address>
+        </div>
+
+        <form class="contact-form reveal" id="contact-form" novalidate>
+          <label>
+            Nombre completo
+            <input type="text" name="name" autocomplete="name" required />
+          </label>
+          <label>
+            Correo o telefono
+            <input type="text" name="contact" autocomplete="email" required />
+          </label>
+          <label>
+            Tipo de solicitud
+            <select name="request" required>
+              <option value="">Selecciona una opcion</option>
+              <option>Calificaciones</option>
+              <option>Horario</option>
+              <option>Documentos</option>
+              <option>Votaciones</option>
+              <option>Otro</option>
+            </select>
+          </label>
+          <label>
+            Mensaje
+            <textarea name="message" rows="4" required></textarea>
+          </label>
+          <button class="button primary" type="submit">Enviar solicitud</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Institucion Educativa John F Kennedy - Sede El Cinco</p>
+      <a href="#inicio">Volver arriba</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
