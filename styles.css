@@ -223,15 +223,15 @@ h3,
 
 .hero {
   min-height: calc(100vh - 78px);
-  padding: 58px 0 36px;
+  padding: 48px 0 36px;
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
-  gap: 52px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+  gap: 36px;
   align-items: center;
 }
 
 .hero-copy {
-  max-width: 720px;
+  max-width: 620px;
 }
 
 .eyebrow {
@@ -255,6 +255,11 @@ h1 {
   font-size: clamp(3rem, 7.1vw, 6.9rem);
   line-height: 0.94;
   letter-spacing: 0;
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 5vw, 5.25rem);
+  line-height: 0.98;
 }
 
 h2 {
@@ -331,7 +336,8 @@ h3 {
 
 .hero-image {
   width: 100%;
-  min-height: 460px;
+  height: min(58vh, 520px);
+  min-height: 390px;
   display: block;
   object-fit: cover;
   border-radius: var(--radius);
@@ -731,6 +737,45 @@ h3 {
   font-weight: 900;
 }
 
+.location-section {
+  width: min(var(--max), calc(100% - 32px));
+  margin: 92px auto 84px;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(420px, 1.28fr);
+  gap: 26px;
+  align-items: stretch;
+}
+
+.location-copy,
+.map-frame {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.location-copy {
+  padding: 28px;
+}
+
+.location-copy .button {
+  margin-top: 12px;
+}
+
+.map-frame {
+  min-height: 390px;
+  overflow: hidden;
+}
+
+.map-frame iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 390px;
+  display: block;
+  border: 0;
+  filter: saturate(0.92) contrast(1.02);
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1028,12 +1073,14 @@ th {
   .page-hero,
   .split,
   .contact-grid,
+  .location-section,
   .chat-page {
     grid-template-columns: 1fr;
   }
 
   .hero {
     min-height: auto;
+    padding-top: 38px;
   }
 
   .values-grid,
@@ -1082,6 +1129,10 @@ th {
   .hero-image,
   .placeholder.tall {
     min-height: 320px;
+  }
+
+  .hero-image {
+    height: 360px;
   }
 
   .stats-strip,
