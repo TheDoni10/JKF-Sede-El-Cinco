@@ -105,6 +105,97 @@ contactForm?.addEventListener("submit", (event) => {
   contactForm.reset();
 });
 
+const eventCards = document.querySelectorAll(".event-card");
+
+const getLocalDate = (dateText) => {
+  const [year, month, day] = dateText.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const formatIcsDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+};
+
+const escapeIcsText = (text) =>
+  text
+    .replace(/\\/g, "\\\\")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;")
+    .replace(/\n/g, "\\n");
+
+const updateEventCountdowns = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  eventCards.forEach((card) => {
+    const date = getLocalDate(card.dataset.eventDate);
+    const countdown = card.querySelector("[data-countdown]");
+    const difference = Math.ceil((date - today) / 86400000);
+
+    countdown.classList.remove("is-today", "is-past");
+
+    if (difference > 1) {
+      countdown.textContent = `Faltan ${difference} dias`;
+    } else if (difference === 1) {
+      countdown.textContent = "Falta 1 dia";
+    } else if (difference === 0) {
+      countdown.textContent = "Es hoy";
+      countdown.classList.add("is-today");
+    } else {
+      countdown.textContent = "Evento realizado";
+      countdown.classList.add("is-past");
+    }
+  });
+};
+
+const downloadCalendarEvent = (card) => {
+  const startDate = getLocalDate(card.dataset.eventDate);
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + 1);
+
+  const title = card.dataset.eventTitle || "Evento institucional";
+  const description = card.dataset.eventDescription || "";
+  const location = "R878+W6 Vegachi, Antioquia, Colombia";
+  const fileName = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "evento";
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//JFK Sede El Cinco//Calendario Escolar//ES",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:${card.dataset.eventDate}-${fileName}@jfk-sede-el-cinco`,
+    `DTSTAMP:${formatIcsDate(new Date())}T120000Z`,
+    `DTSTART;VALUE=DATE:${formatIcsDate(startDate)}`,
+    `DTEND;VALUE=DATE:${formatIcsDate(endDate)}`,
+    `SUMMARY:${escapeIcsText(title)}`,
+    `DESCRIPTION:${escapeIcsText(description)}`,
+    `LOCATION:${escapeIcsText(location)}`,
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${fileName}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
+eventCards.forEach((card) => {
+  card.querySelector("[data-calendar]")?.addEventListener("click", () => {
+    downloadCalendarEvent(card);
+  });
+});
+
+updateEventCountdowns();
+
 const googleNewsList = document.querySelector("#google-news-list");
 
 const getTodayKey = () => new Date().toISOString().slice(0, 10);

@@ -516,6 +516,55 @@ h3 {
   padding: 22px;
 }
 
+.event-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.countdown-badge,
+.calendar-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.countdown-badge {
+  padding: 8px 10px;
+  color: #07111f;
+  background: var(--lime);
+}
+
+.countdown-badge.is-today {
+  background: var(--gold);
+}
+
+.countdown-badge.is-past {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.calendar-button {
+  padding: 8px 11px;
+  border: 1px solid rgba(94, 228, 255, 0.32);
+  color: var(--cyan);
+  background: rgba(94, 228, 255, 0.08);
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.calendar-button:hover,
+.calendar-button:focus-visible {
+  background: rgba(94, 228, 255, 0.14);
+  transform: translateY(-1px);
+}
+
 .tag-row {
   display: flex;
   align-items: center;
@@ -1189,5 +1238,10 @@ th {
 
   .message {
     max-width: 100%;
+  }
+
+  .event-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
