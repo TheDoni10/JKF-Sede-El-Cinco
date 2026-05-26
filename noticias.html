@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noticias | Institucion Educativa John F Kennedy</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header"><nav class="nav" aria-label="Navegacion principal"><a class="brand" href="index.html"><img class="brand-logo" src="assets/img/logo/Logo.JFK.png" alt="Logo Institucion Educativa John F Kennedy" /><span><strong>John F Kennedy</strong><span>Sede El Cinco</span></span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button><div class="nav-links" id="site-menu"><a href="index.html">Inicio</a><a href="nosotros.html">Nosotros</a><a href="noticias.html">Noticias</a><a href="galeria.html">Galeria</a><a href="personero.html">Personero</a><a href="chat.html">Chat IA</a><a href="contacto.html">Contacto</a><a class="nav-action" href="portal.html">Portal Estudiantes</a></div></nav></header>
+
+    <main class="page-shell">
+      <section class="page-hero compact reveal">
+        <p class="eyebrow">Noticias y eventos</p>
+        <h1>Vida escolar en movimiento</h1>
+        <p class="lead">Actividades, comunicados y momentos importantes para estudiantes, familias y docentes.</p>
+      </section>
+
+      <section class="section news-grid">
+        <article class="news-card reveal">
+          <div class="placeholder">Imagen entrega de boletines</div>
+          <div class="news-body"><div class="tag-row"><span class="tag">Academico</span><time datetime="2026-05-30">30 May 2026</time></div><h3>Entrega de boletines</h3><p>Evaluamos para seguir creciendo juntos con estudiantes, familias y docentes.</p></div>
+        </article>
+        <article class="news-card reveal">
+          <div class="placeholder">Imagen reunion de familias</div>
+          <div class="news-body"><div class="tag-row"><span class="tag">Comunidad</span><time datetime="2026-06-05">5 Jun 2026</time></div><h3>Reunion de padres de familia</h3><p>Un espacio para dialogar, resolver inquietudes y trabajar en equipo por el proceso escolar.</p></div>
+        </article>
+        <article class="news-card reveal">
+          <div class="placeholder">Imagen izada de bandera</div>
+          <div class="news-body"><div class="tag-row"><span class="tag">Institucional</span><time datetime="2026-06-13">13 Jun 2026</time></div><h3>Izada de bandera</h3><p>Honramos nuestros valores, simbolos y el sentido de pertenencia por nuestra institucion.</p></div>
+        </article>
+        <article class="news-card reveal">
+          <div class="placeholder">Imagen semana cultural</div>
+          <div class="news-body"><div class="tag-row"><span class="tag">Cultura</span><time datetime="2026-06-20">20 Jun 2026</time></div><h3>Semana cultural</h3><p>Celebramos el talento, la creatividad y las expresiones artisticas de nuestra comunidad educativa.</p></div>
+        </article>
+        <article class="news-card reveal">
+          <div class="placeholder">Imagen torneo interclases</div>
+          <div class="news-body"><div class="tag-row"><span class="tag">Deporte</span><time datetime="2026-06-27">27 Jun 2026</time></div><h3>Torneo interclases</h3><p>Una jornada para vivir el deporte, el companerismo y la sana competencia.</p></div>
+        </article>
+      </section>
+
+      <section class="section live-news-section reveal" aria-labelledby="live-news-title">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Actualidad educativa</p>
+            <h2 id="live-news-title">Noticias recientes de educacion en Colombia</h2>
+          </div>
+          <a
+            class="button ghost"
+            href="https://news.google.com/search?q=educacion%20Colombia&hl=es-419&gl=CO&ceid=CO:es-419"
+            target="_blank"
+            rel="noopener"
+          >
+            Ver en Google News
+          </a>
+        </div>
+        <p class="muted live-news-note">
+          Se actualiza automaticamente una vez al dia desde Google News.
+        </p>
+        <div class="live-news-grid" id="google-news-list" aria-live="polite">
+          <article class="live-news-card">
+            <span class="tag">Cargando</span>
+            <h3>Buscando noticias actuales...</h3>
+            <p>Si no aparecen, revisa tu conexion a internet o usa el enlace de Google News.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><div class="footer-inner"><span>Noticias institucionales</span><a href="contacto.html">Enviar informacion</a></div></footer>
+    <script src="main.js"></script>
+  </body>
+</html>
