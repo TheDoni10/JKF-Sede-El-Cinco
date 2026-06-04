@@ -196,11 +196,19 @@ eventCards.forEach((card) => {
 
 updateEventCountdowns();
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTICIAS — reemplaza desde "const googleNewsList" hasta el final de
+// "loadGoogleEducationNews();" en tu main.js actual
+// ─────────────────────────────────────────────────────────────────────────────
+
 const googleNewsList = document.querySelector("#google-news-list");
 
 const getTodayKey = () => new Date().toISOString().slice(0, 10);
 
 const cleanNewsTitle = (title) => title.replace(/\s+-\s+[^-]+$/, "").trim();
+
+const googleNewsUrl =
+  "https://news.google.com/search?q=educacion%20Colombia&hl=es-419&gl=CO&ceid=CO:es-419";
 
 const formatNewsDate = (dateText) => {
   const date = new Date(dateText);
@@ -208,20 +216,58 @@ const formatNewsDate = (dateText) => {
   return new Intl.DateTimeFormat("es-CO", {
     day: "numeric",
     month: "short",
-    year: "numeric"
+    year: "numeric",
   }).format(date);
 };
 
+// ── Skeleton loader ────────────────────────────────────────────────────────────
+
+const renderSkeletons = () => {
+  if (!googleNewsList) return;
+  googleNewsList.innerHTML = Array.from({ length: 5 })
+    .map(
+      () => `
+    <article class="live-news-card live-news-skeleton" aria-hidden="true">
+      <div class="skeleton-preview"></div>
+      <div class="skeleton-tag"></div>
+      <div class="skeleton-title"></div>
+      <div class="skeleton-title skeleton-title--short"></div>
+      <div class="skeleton-source"></div>
+      <div class="skeleton-link"></div>
+    </article>`
+    )
+    .join("");
+};
+
+// ── Render de noticias reales ──────────────────────────────────────────────────
+
 const renderGoogleNews = (items) => {
+  if (!googleNewsList) return;
   googleNewsList.innerHTML = "";
 
-  items.slice(0, 5).forEach((item) => {
+  items.slice(0, 5).forEach((item, index) => {
     const card = document.createElement("article");
     card.className = "live-news-card";
 
+    const preview = document.createElement("a");
+    preview.className = "live-news-preview";
+    preview.href = item.link;
+    preview.target = "_blank";
+    preview.rel = "noopener";
+    preview.setAttribute("aria-label", `Abrir noticia: ${cleanNewsTitle(item.title)}`);
+    preview.dataset.variant = String((index % 5) + 1);
+
+    const previewSource = document.createElement("span");
+    previewSource.textContent = item.source || "Google News";
+
+    const previewTitle = document.createElement("strong");
+    previewTitle.textContent = "Educacion";
+
+    preview.append(previewSource, previewTitle);
+
     const tag = document.createElement("span");
     tag.className = "tag";
-    tag.textContent = "Google News";
+    tag.textContent = item.source === "groq" ? "IA Educativa" : "Google News";
 
     const time = document.createElement("time");
     time.dateTime = item.isoDate || "";
@@ -239,68 +285,73 @@ const renderGoogleNews = (items) => {
     link.rel = "noopener";
     link.textContent = "Leer noticia";
 
-    card.append(tag, time, title, source, link);
+    card.append(preview, tag, time, title, source, link);
     googleNewsList.appendChild(card);
   });
 };
 
+// ── Render de error ────────────────────────────────────────────────────────────
+
 const renderGoogleNewsError = () => {
+  if (!googleNewsList) return;
   googleNewsList.innerHTML = `
     <article class="live-news-card">
+      <a class="live-news-preview" data-variant="1" href="${googleNewsUrl}"
+         target="_blank" rel="noopener" aria-label="Abrir Google News">
+        <span>Google News</span>
+        <strong>Educacion</strong>
+      </a>
       <span class="tag">Google News</span>
       <h3>No se pudieron cargar las noticias automaticas.</h3>
-      <p>Puede ser un bloqueo temporal del proxy RSS. Usa el boton "Ver en Google News" para consultar las noticias actuales.</p>
-      <a href="https://news.google.com/search?q=educacion%20Colombia&hl=es-419&gl=CO&ceid=CO:es-419" target="_blank" rel="noopener">Abrir Google News</a>
+      <p>Puede ser un bloqueo temporal. Usa el boton "Ver en Google News" para consultar las noticias actuales.</p>
+      <a href="${googleNewsUrl}" target="_blank" rel="noopener">Abrir Google News</a>
     </article>
   `;
 };
+
+// ── Carga principal con cache diario ──────────────────────────────────────────
 
 const loadGoogleEducationNews = async () => {
   if (!googleNewsList) return;
 
   const cacheKey = "jfk-google-news-cache";
   const today = getTodayKey();
-  let cached = null;
 
+  // 1. Intentar cache local del dia
   try {
-    cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
-  } catch (error) {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+    if (cached?.date === today && Array.isArray(cached.items) && cached.items.length) {
+      renderGoogleNews(cached.items);
+      return;
+    }
+  } catch {
     localStorage.removeItem(cacheKey);
   }
 
-  if (cached?.date === today && Array.isArray(cached.items)) {
-    renderGoogleNews(cached.items);
-    return;
-  }
+  // 2. Mostrar skeletons mientras carga
+  renderSkeletons();
 
-  const googleRss = "https://news.google.com/rss/search?q=educacion%20Colombia&hl=es-419&gl=CO&ceid=CO:es-419";
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(googleRss)}`;
-
+  // 3. Llamar al endpoint /api/news (RSS primero, Groq como fallback)
   try {
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error("No se pudo leer Google News.");
+    const apiResponse = await fetch("/api/news");
 
-    const xmlText = await response.text();
-    const xml = new DOMParser().parseFromString(xmlText, "application/xml");
-    const items = Array.from(xml.querySelectorAll("item")).slice(0, 5).map((item) => ({
-      title: item.querySelector("title")?.textContent || "Noticia educativa",
-      link: item.querySelector("link")?.textContent || "https://news.google.com/",
-      pubDate: item.querySelector("pubDate")?.textContent || "",
-      isoDate: "",
-      source: item.querySelector("source")?.textContent || ""
-    })).map((item) => {
-      const date = new Date(item.pubDate);
-      return {
-        ...item,
-        isoDate: Number.isNaN(date.getTime()) ? "" : date.toISOString()
-      };
-    });
+    if (!apiResponse.ok) throw new Error(`/api/news respondio ${apiResponse.status}`);
 
-    if (!items.length) throw new Error("Google News no devolvio noticias.");
+    const data = await apiResponse.json();
+    const items = Array.isArray(data.items) ? data.items : [];
 
-    localStorage.setItem(cacheKey, JSON.stringify({ date: today, items }));
-    renderGoogleNews(items);
+    if (!items.length) throw new Error("Sin items en la respuesta");
+
+    // Guardar en cache con la fuente para el tag visual
+    const itemsWithSource = items.map((item) => ({
+      ...item,
+      source: data.source === "groq" ? "groq" : item.source,
+    }));
+
+    localStorage.setItem(cacheKey, JSON.stringify({ date: today, items: itemsWithSource }));
+    renderGoogleNews(itemsWithSource);
   } catch (error) {
+    console.warn("[news] Error cargando noticias:", error.message);
     renderGoogleNewsError();
   }
 };
@@ -309,11 +360,27 @@ loadGoogleEducationNews();
 
 const lightbox = document.querySelector("#lightbox");
 const lightboxCaption = document.querySelector(".lightbox-caption");
+const lightboxFrame = document.querySelector(".lightbox-frame");
 const lightboxClose = document.querySelector(".lightbox-close");
 
 document.querySelectorAll("[data-lightbox]").forEach((item) => {
   item.addEventListener("click", () => {
+    const image = item.querySelector("img");
     lightboxCaption.textContent = item.dataset.lightbox;
+
+    if (lightboxFrame) {
+      lightboxFrame.textContent = "";
+
+      if (image) {
+        const largeImage = document.createElement("img");
+        largeImage.src = image.currentSrc || image.src;
+        largeImage.alt = image.alt || item.dataset.lightbox || "Imagen de galeria";
+        lightboxFrame.appendChild(largeImage);
+      } else {
+        lightboxFrame.textContent = "Imagen ampliada";
+      }
+    }
+
     lightbox.classList.add("is-open");
     document.body.classList.add("no-scroll");
   });
