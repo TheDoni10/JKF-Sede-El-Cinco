@@ -23,15 +23,36 @@
       <section class="chat-panel reveal" aria-label="Chat con IA">
         <div class="chat-header">
           <h2>Chat educativo</h2>
-          <p class="muted">Configurado para responder como asistente academico e informativo del colegio.</p>
+          <p class="muted">Responde con informacion local del colegio y orientacion academica basica.</p>
         </div>
         <div class="chat-messages" id="chat-messages">
           <div class="message bot">Hola. Soy el asistente educativo de la Institucion Educativa John F Kennedy - Sede El Cinco. ?En que puedo ayudarte hoy?</div>
         </div>
+        <div class="quick-questions" aria-label="Preguntas frecuentes">
+          <button type="button" data-question="?Cual es el horario del colegio?">Horario</button>
+          <button type="button" data-question="?Como es el proceso de matricula?">Matricula</button>
+          <button type="button" data-question="?Cual es el contacto del colegio?">Contacto</button>
+          <button type="button" data-question="?Que grados ofrece el colegio?">Grados</button>
+          <button type="button" data-question="?Quienes son los docentes?">Docentes</button>
+          <button type="button" data-question="?Quien es el personero estudiantil?">Personero</button>
+          <button type="button" data-question="?Como funciona el restaurante escolar?">Restaurante</button>
+          <button type="button" data-question="?Hay transporte escolar?">Transporte</button>
+        </div>
+        <div class="image-preview is-hidden" id="image-preview" aria-live="polite">
+          <img id="image-preview-img" alt="Vista previa del ejercicio" />
+          <div>
+            <strong>Foto lista</strong>
+            <span id="image-preview-name">Ejercicio adjunto</span>
+          </div>
+          <button type="button" id="remove-image" aria-label="Quitar imagen">Quitar</button>
+        </div>
         <form class="chat-form" id="chat-form">
-          <input id="chat-input" type="text" autocomplete="off" placeholder="Escribe tu pregunta..." required />
+          <label class="image-upload" for="chat-image" title="Subir foto de un ejercicio">Foto</label>
+          <input class="sr-only" id="chat-image" type="file" accept="image/png,image/jpeg,image/webp" />
+          <input id="chat-input" type="text" autocomplete="off" placeholder="Escribe tu pregunta..." />
           <button class="button primary" type="submit">Enviar</button>
         </form>
+        <p class="chat-note">Este chat es informativo y no reemplaza la atencion oficial del colegio.</p>
       </section>
     </main>
 

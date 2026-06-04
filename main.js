@@ -373,20 +373,92 @@ document.querySelectorAll(".tab-button").forEach((tab) => {
   });
 });
 
-/*
-  Configuracion Anthropic:
-  Reemplaza ANTHROPIC_API_KEY con tu clave.
-  En produccion no expongas esta clave en el navegador; usa un backend proxy seguro.
-*/
-const ANTHROPIC_API_KEY = "REEMPLAZA_AQUI_TU_API_KEY";
-const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
-
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
 const chatMessages = document.querySelector("#chat-messages");
+const quickQuestions = document.querySelectorAll("[data-question]");
+const chatImage = document.querySelector("#chat-image");
+const imagePreview = document.querySelector("#image-preview");
+const imagePreviewImg = document.querySelector("#image-preview-img");
+const imagePreviewName = document.querySelector("#image-preview-name");
+const removeImageButton = document.querySelector("#remove-image");
 
-const systemPrompt = `Eres el asistente academico e informativo de la Institucion Educativa John F Kennedy - Sede El Cinco, ubicada en la Vereda El Cinco, Vegachi, Antioquia. Respondes en espanol claro y amable. Ayudas con dudas academicas, orientacion escolar, informacion institucional, horarios, matriculas, personero estudiantil 2025-2026 y contacto. Correo institucional: redes.johnfkennedy@gmail.com. Si no tienes un dato confirmado, dilo y sugiere contactar a la sede.`;
+const chatKnowledge = {
+  saludo: "Hola. Soy el asistente educativo de la Institucion Educativa John F Kennedy - Sede El Cinco. Puedo orientarte sobre informacion del colegio y tambien ayudarte a estudiar con explicaciones claras. Dime que necesitas y lo resolvemos paso a paso.",
+  horario: "El horario de referencia de la sede es de lunes a viernes, de 8:00 a.m. a 2:00 p.m.\n\nSi preguntas por una reunion, salida pedagogica, festivo o cambio de jornada, es mejor confirmarlo directamente con la institucion, porque esos datos pueden variar.",
+  matricula: "La matricula en la sede es gratuita y normalmente se realiza al inicio y al final del ano escolar.\n\nDocumentos sugeridos:\n- Recibo de servicio de energia.\n- Documento del estudiante.\n- Documento del acudiente o responsable.\n\nPara fechas exactas, cupos o casos especiales, comunicate con el colegio.",
+  contacto: "Puedes contactar a la sede por estos medios:\n\nCorreo: redes.johnfkennedy@gmail.com\nTelefono o WhatsApp: +57 312 7400098\n\nPara tramites formales, lo mas recomendable es escribir o llamar en horario escolar.",
+  ubicacion: "La Institucion Educativa John F Kennedy - Sede El Cinco esta ubicada en la Vereda El Cinco, municipio de Vegachi, Antioquia.\n\nSi necesitas indicaciones para llegar, comunicate con la sede para recibir una orientacion mas precisa.",
+  grados: "La sede ofrece formacion desde preescolar hasta media academica:\n\n- Preescolar.\n- Basica primaria.\n- Basica secundaria.\n- Media academica.\n\nPara confirmar disponibilidad de cupos por grado, consulta directamente con la institucion.",
+  docentes: "Docentes mencionados para la sede:\n\n- Azael Renteria.\n- Hugo Contreras.\n- Jesenia.\n- Humberto Quinto.\n- Edwin Castelar.\n\nSi necesitas contactar a un docente especifico, comunicate con el colegio.",
+  personero: "El personero estudiantil representa a los estudiantes, promueve sus derechos y participa en el gobierno escolar.\n\nDato disponible: Felipe Rua. Si necesitas confirmar periodo, propuestas o actividades actuales, consulta directamente con la sede.",
+  restaurante: "La sede cuenta con restaurante escolar durante la jornada de clases. La organizacion puede hacerse por grados, segun la dinamica interna del colegio.\n\nPara informacion sobre menu, horarios o novedades del servicio, confirma con la institucion.",
+  transporte: "Sobre transporte, se menciona que algunos estudiantes llegan caminando, en transporte particular o en bicicleta. Tambien puede haber prestamo de bicicletas segun disponibilidad.\n\nComo esto puede cambiar, confirma directamente con la sede.",
+  noticias: "Para ver actividades, eventos y novedades institucionales, entra a la seccion Noticias del sitio. Alli se publican actualizaciones del colegio y temas educativos.",
+  galeria: "La seccion Galeria muestra fotos y momentos de la sede. Puedes entrar desde el menu principal en la opcion Galeria.",
+  desconocido: "No tengo informacion institucional confirmada sobre eso todavia. Puedes contactar al colegio por correo: redes.johnfkennedy@gmail.com o preguntar de otra forma para intentar ayudarte."
+};
+
+const keywordMap = [
+  { keys: ["hola", "buenas", "saludos", "hey"], answer: "saludo" },
+  { keys: ["horario", "hora", "clases", "jornada", "entrada", "salida"], answer: "horario" },
+  { keys: ["matricula", "inscripcion", "documentos", "cupo"], answer: "matricula" },
+  { keys: ["contacto", "telefono", "whatsapp", "llamar", "numero", "correo", "email"], answer: "contacto" },
+  { keys: ["ubicacion", "direccion", "donde", "queda", "vereda", "llegar"], answer: "ubicacion" },
+  { keys: ["grado", "grados", "preescolar", "primaria", "secundaria", "bachillerato", "once"], answer: "grados" },
+  { keys: ["docente", "docentes", "profesor", "profesores", "maestro", "maestros"], answer: "docentes" },
+  { keys: ["personero", "representante", "gobierno escolar", "voto"], answer: "personero" },
+  { keys: ["restaurante", "almuerzo", "comida", "refrigerio"], answer: "restaurante" },
+  { keys: ["transporte", "ruta", "bicicleta", "bici"], answer: "transporte" },
+  { keys: ["noticias", "actividad", "actividades", "evento", "calendario"], answer: "noticias" },
+  { keys: ["galeria", "fotos", "imagenes"], answer: "galeria" }
+];
+
+const directAnswers = [
+  {
+    keys: ["capital de colombia", "capital colombia"],
+    answer: "La capital de Colombia es Bogota."
+  },
+  {
+    keys: ["presidente de colombia"],
+    answer: "No tengo confirmado el dato actualizado del presidente. Para informacion politica actual, consulta una fuente oficial o una noticia reciente."
+  },
+  {
+    keys: ["departamento de vegachi", "departamento vegachi"],
+    answer: "Vegachi pertenece al departamento de Antioquia, Colombia."
+  },
+  {
+    keys: ["municipio de la sede", "municipio sede el cinco"],
+    answer: "La Sede El Cinco esta en el municipio de Vegachi, Antioquia."
+  }
+];
+
 const chatHistory = [];
+let selectedImage = null;
+
+const normalizeText = (text) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .trim();
+
+const getLocalAnswer = (text) => {
+  const normalized = normalizeText(text);
+  const directMatch = directAnswers.find((item) => item.keys.some((key) => normalized.includes(normalizeText(key))));
+  if (directMatch) return directMatch.answer;
+
+  const isGeneralQuestion = /^(que|cual|quien|cuando|donde|como|por que|cuanto|cuantos)\b/.test(normalized);
+  const schoolWords = ["colegio", "sede", "john", "kennedy", "matricula", "horario", "docente", "personero", "restaurante", "transporte", "vereda", "contacto", "correo", "telefono", "grado", "galeria", "noticias"];
+
+  if (isGeneralQuestion && !schoolWords.some((word) => normalized.includes(word))) {
+    return null;
+  }
+
+  const match = keywordMap.find((item) => item.keys.some((key) => normalized.includes(normalizeText(key))));
+  return match ? chatKnowledge[match.answer] : null;
+};
 
 const addMessage = (text, type = "bot") => {
   const message = document.createElement("div");
@@ -397,48 +469,161 @@ const addMessage = (text, type = "bot") => {
   return message;
 };
 
-chatForm?.addEventListener("submit", async (event) => {
+const addThinkingMessage = () => {
+  const message = document.createElement("div");
+  message.className = "message bot thinking";
+  message.setAttribute("aria-label", "Pensando");
+
+  ["", "", ""].forEach(() => {
+    const dot = document.createElement("span");
+    message.appendChild(dot);
+  });
+
+  chatMessages.appendChild(message);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return message;
+};
+
+const setChatDisabled = (disabled) => {
+  if (chatInput) chatInput.disabled = disabled;
+  if (chatImage) chatImage.disabled = disabled;
+  chatForm?.querySelector("button")?.toggleAttribute("disabled", disabled);
+};
+
+const askGroqAssistant = async (text, imageDataUrl = null) => {
+  const serverResponse = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: text,
+      history: chatHistory.slice(0, -1).slice(-8),
+      image: imageDataUrl
+    })
+  });
+
+  if (!serverResponse.ok) {
+    throw new Error("No se pudo consultar Groq.");
+  }
+
+  const data = await serverResponse.json();
+  return data.answer || chatKnowledge.desconocido;
+};
+
+const resizeImage = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const image = new Image();
+
+      image.onload = () => {
+        const maxSize = 1400;
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(image.width * scale);
+        canvas.height = Math.round(image.height * scale);
+
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+
+      image.onerror = () => reject(new Error("No se pudo leer la imagen."));
+      image.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error("No se pudo cargar la imagen."));
+    reader.readAsDataURL(file);
+  });
+
+const clearSelectedImage = () => {
+  selectedImage = null;
+  if (chatImage) chatImage.value = "";
+  imagePreview?.classList.add("is-hidden");
+  if (imagePreviewImg) imagePreviewImg.removeAttribute("src");
+};
+
+const updateImagePreview = (file, dataUrl) => {
+  selectedImage = {
+    name: file.name,
+    dataUrl
+  };
+
+  if (imagePreviewImg) imagePreviewImg.src = dataUrl;
+  if (imagePreviewName) imagePreviewName.textContent = file.name;
+  imagePreview?.classList.remove("is-hidden");
+};
+
+const sendLocalMessage = (text) => {
+  const imageDataUrl = selectedImage?.dataUrl || null;
+  const imageName = selectedImage?.name || "";
+  const cleanText = text.trim().slice(0, 500);
+  if ((!cleanText && !imageDataUrl) || !chatMessages) return;
+
+  const userText = imageDataUrl
+    ? `${cleanText || "Resuelve el ejercicio de la foto paso a paso."}\n[Imagen adjunta: ${imageName}]`
+    : cleanText;
+
+  addMessage(userText, "user");
+  chatHistory.push({ role: "user", content: cleanText || "Resuelve el ejercicio de la foto paso a paso." });
+  setChatDisabled(true);
+  clearSelectedImage();
+
+  const pending = addThinkingMessage();
+  const delay = 450 + Math.random() * 450;
+
+  window.setTimeout(async () => {
+    try {
+      const localAnswer = imageDataUrl ? null : getLocalAnswer(cleanText);
+      const answer = localAnswer || await askGroqAssistant(cleanText, imageDataUrl);
+      pending.textContent = answer;
+      chatHistory.push({ role: "assistant", content: answer });
+    } catch (error) {
+      pending.textContent = `${chatKnowledge.desconocido}\n\nLa IA externa no esta disponible en este momento.`;
+    } finally {
+      setChatDisabled(false);
+      chatInput?.focus();
+    }
+  }, delay);
+};
+
+chatForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = chatInput.value.trim();
-  if (!text) return;
+  if (!text && !selectedImage) return;
 
-  addMessage(text, "user");
-  chatHistory.push({ role: "user", content: text });
   chatInput.value = "";
+  sendLocalMessage(text);
+});
 
-  if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY.includes("REEMPLAZA")) {
-    addMessage("Configura tu API key de Anthropic en main.js para activar respuestas reales. Mientras tanto, puedo mostrarte la interfaz lista para conectar.", "bot");
+quickQuestions.forEach((button) => {
+  button.addEventListener("click", () => {
+    sendLocalMessage(button.dataset.question || button.textContent || "");
+  });
+});
+
+chatImage?.addEventListener("change", async () => {
+  const file = chatImage.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    addMessage("Selecciona una imagen valida del ejercicio.", "bot");
+    clearSelectedImage();
     return;
   }
 
-  const pending = addMessage("Pensando...", "bot");
-
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true"
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: 700,
-        system: systemPrompt,
-        messages: chatHistory.slice(-10)
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error("No se pudo conectar con Anthropic.");
+    const dataUrl = await resizeImage(file);
+    updateImagePreview(file, dataUrl);
+    if (!chatInput.value.trim()) {
+      chatInput.placeholder = "Ejemplo: resuelve este problema paso a paso...";
     }
-
-    const data = await response.json();
-    const answer = data.content?.map((part) => part.text).join("\n").trim() || "No recibi una respuesta valida.";
-    pending.textContent = answer;
-    chatHistory.push({ role: "assistant", content: answer });
   } catch (error) {
-    pending.textContent = "Hubo un problema al consultar la IA. Revisa la API key, CORS o usa un backend proxy.";
+    addMessage("No pude preparar la imagen. Intenta con una foto mas pequena o mas nitida.", "bot");
+    clearSelectedImage();
   }
 });
+
+removeImageButton?.addEventListener("click", clearSelectedImage);
