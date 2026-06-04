@@ -491,24 +491,55 @@ const setChatDisabled = (disabled) => {
 };
 
 const askGroqAssistant = async (text, imageDataUrl = null) => {
-  const serverResponse = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: text,
-      history: chatHistory.slice(0, -1).slice(-8),
-      image: imageDataUrl
-    })
-  });
+  let serverResponse;
 
-  if (!serverResponse.ok) {
-    throw new Error("No se pudo consultar Groq.");
+  try {
+    serverResponse = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: text,
+        history: chatHistory.slice(0, -1).slice(-8),
+        image: imageDataUrl
+      })
+    });
+  } catch (error) {
+    throw new Error("El servidor del chat no esta disponible. Publica el sitio en Vercel y configura GROQ_API_KEY.");
   }
 
-  const data = await serverResponse.json();
-  return data.answer || chatKnowledge.desconocido;
+  let data = null;
+
+  try {
+    data = await serverResponse.json();
+  } catch (error) {
+    data = null;
+  }
+
+  if (serverResponse.status === 404) {
+    throw new Error("El endpoint /api/chat no existe en este hosting. GitHub Pages no ejecuta funciones de API; usa Vercel.");
+  }
+
+  if (!serverResponse.ok) {
+    throw new Error(data?.error || "No se pudo consultar Groq.");
+  }
+
+  return data?.answer || chatKnowledge.desconocido;
+};
+
+const getExternalAiErrorMessage = (error) => {
+  const detail = error?.message || "La IA externa no esta disponible en este momento.";
+
+  if (location.protocol === "file:") {
+    return "La IA externa no funciona abriendo el archivo directamente. Debes publicar el sitio en Vercel y configurar GROQ_API_KEY.";
+  }
+
+  if (location.hostname.endsWith("github.io")) {
+    return "La IA externa no funciona en GitHub Pages porque GitHub Pages no ejecuta /api/chat. Publica el sitio en Vercel y configura GROQ_API_KEY.";
+  }
+
+  return `${chatKnowledge.desconocido}\n\n${detail}`;
 };
 
 const resizeImage = (file) =>
@@ -581,7 +612,7 @@ const sendLocalMessage = (text) => {
       pending.textContent = answer;
       chatHistory.push({ role: "assistant", content: answer });
     } catch (error) {
-      pending.textContent = `${chatKnowledge.desconocido}\n\nLa IA externa no esta disponible en este momento.`;
+      pending.textContent = getExternalAiErrorMessage(error);
     } finally {
       setChatDisabled(false);
       chatInput?.focus();
