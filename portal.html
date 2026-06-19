@@ -3,57 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Estudiantes | Institucion Educativa John F Kennedy</title>
+    <meta http-equiv="refresh" content="0; url=/academico" />
+    <title>Portal Academico | Institucion Educativa John F Kennedy</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="site-header"><nav class="nav" aria-label="Navegacion principal"><a class="brand" href="index.html"><img class="brand-logo" src="assets/img/logo/Logo.JFK.png" alt="Logo Institucion Educativa John F Kennedy" /><span><strong>John F Kennedy</strong><span>Sede El Cinco</span></span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button><div class="nav-links" id="site-menu"><a href="index.html">Inicio</a><a href="nosotros.html">Nosotros</a><a href="noticias.html">Noticias</a><a href="galeria.html">Galeria</a><a href="personero.html">Personero</a><a href="chat.html">Chat IA</a><a href="contacto.html">Contacto</a><a class="nav-action" href="portal.html">Portal Estudiantes</a></div></nav></header>
+    <header class="site-header">
+      <nav class="nav" aria-label="Navegacion principal">
+        <a class="brand" href="index.html">
+          <img class="brand-logo" src="assets/img/logo/Logo.JFK.png" alt="Logo Institucion Educativa John F Kennedy" />
+          <span><strong>John F Kennedy</strong><span>Sede El Cinco</span></span>
+        </a>
+        <div class="nav-links">
+          <a href="index.html">Inicio</a>
+          <a class="nav-action is-active" href="/academico">Portal Academico</a>
+        </div>
+      </nav>
+    </header>
 
     <main class="page-shell portal-layout">
-      <section class="login-panel reveal" id="login-panel">
-        <p class="eyebrow">Portal del estudiante</p>
-        <h1>Ingreso</h1>
-        <p class="lead">Usa cualquier correo y contrasena de ejemplo para ver el dashboard.</p>
-        <form id="login-form" class="content-stack">
-          <label>Correo<input type="email" name="email" autocomplete="email" required /></label>
-          <label>Contrasena<input type="password" name="password" autocomplete="current-password" required /></label>
-          <button class="button primary" type="submit">Ingresar</button>
-          <p class="form-status" role="status"></p>
-        </form>
-      </section>
-
-      <section class="dashboard is-hidden" id="dashboard">
-        <div class="dashboard-top">
-          <div><p class="eyebrow">Dashboard</p><h1>Bienvenido al portal</h1></div>
-          <button class="button secondary" type="button" id="logout-button">Salir</button>
-        </div>
-        <div class="tab-list" role="tablist" aria-label="Secciones del portal">
-          <button class="tab-button is-active" type="button" data-tab="grades">Calificaciones</button>
-          <button class="tab-button" type="button" data-tab="schedule">Horario</button>
-          <button class="tab-button" type="button" data-tab="documents">Documentos</button>
-        </div>
-        <article class="tab-panel" data-panel="grades">
-          <div class="table-wrap"><table><thead><tr><th>Asignatura</th><th>Periodo 1</th><th>Periodo 2</th><th>Observacion</th></tr></thead><tbody><tr><td>Matematicas</td><td>4.2</td><td>4.5</td><td>Excelente avance</td></tr><tr><td>Ciencias Naturales</td><td>4.0</td><td>4.3</td><td>Participacion activa</td></tr><tr><td>Lengua Castellana</td><td>4.4</td><td>4.6</td><td>Muy buen proceso lector</td></tr></tbody></table></div>
-        </article>
-        <article class="tab-panel is-hidden" data-panel="schedule">
-          <div class="schedule-grid">
-            <div class="day-column"><strong>Lunes</strong><span>Matematicas</span><span>Ciencias</span><span>Educacion fisica</span></div>
-            <div class="day-column"><strong>Martes</strong><span>Lengua Castellana</span><span>Sociales</span><span>Ingles</span></div>
-            <div class="day-column"><strong>Miercoles</strong><span>Tecnologia</span><span>Artistica</span><span>Matematicas</span></div>
-            <div class="day-column"><strong>Jueves</strong><span>Ciencias</span><span>Etica</span><span>Lectura</span></div>
-            <div class="day-column"><strong>Viernes</strong><span>Sociales</span><span>Proyecto</span><span>Convivencia</span></div>
-          </div>
-        </article>
-        <article class="tab-panel is-hidden" data-panel="documents">
-          <ul class="doc-list">
-            <li><a href="#" download>Formato de permiso <span>PDF</span></a></li>
-            <li><a href="#" download>Circular para familias <span>PDF</span></a></li>
-            <li><a href="#" download>Guia academica semanal <span>DOC</span></a></li>
-          </ul>
-        </article>
+      <section class="login-panel portal-login reveal is-visible">
+        <p class="eyebrow">Portal academico</p>
+        <h1>Abriendo el sistema academico</h1>
+        <p class="lead">Si no eres redirigido automaticamente, entra al nuevo modulo academico.</p>
+        <a class="button primary" href="/academico">Abrir portal</a>
       </section>
     </main>
-
-    <script src="main.js"></script>
   </body>
 </html>

@@ -21,3 +21,24 @@ GitHub Pages no ejecuta funciones dentro de `/api`, por eso el chat IA no funcio
 5. Haz redeploy del proyecto.
 
 Si la clave anterior estuvo en GitHub, revocala en Groq y crea una nueva.
+
+## Portal academico con Supabase
+
+El modulo academico vive en `/academico` y usa Next.js, React, Vercel y Supabase.
+
+Variables requeridas en Vercel:
+
+```env
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_ANON_KEY=tu_clave_publica
+SUPABASE_SERVICE_ROLE_KEY=tu_clave_secreta
+ACADEMIC_SESSION_SECRET=texto_largo_aleatorio
+TEACHER_PORTAL_SECRET=clave_para_profesores
+```
+
+Ejecuta `supabase-schema.sql` en Supabase SQL Editor antes de probar.
+
+Accesos demo despues de ejecutar el SQL:
+
+- Estudiante: documento `12345`.
+- Profesor: documento `1000` y la clave definida en `TEACHER_PORTAL_SECRET`.

@@ -399,46 +399,566 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeLightbox();
 });
 
+const portalRoot = document.querySelector("[data-portal]");
 const loginForm = document.querySelector("#login-form");
 const loginPanel = document.querySelector("#login-panel");
 const dashboard = document.querySelector("#dashboard");
 const logoutButton = document.querySelector("#logout-button");
 
-loginForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const email = loginForm.email.value.trim();
-  const password = loginForm.password.value.trim();
-  const status = loginForm.querySelector(".form-status");
+if (portalRoot && loginForm && loginPanel && dashboard) {
+  const portalState = {
+    client: null,
+    user: null,
+    profile: null,
+    students: [],
+    grades: [],
+  };
 
-  if (!email || !password) {
-    status.textContent = "Ingresa correo y contrasena.";
-    status.style.color = "var(--danger)";
-    return;
-  }
+  const portalEls = {
+    loginStatus: document.querySelector("[data-login-status]"),
+    alert: document.querySelector("[data-portal-alert]"),
+    roleLabel: document.querySelector("[data-role-label]"),
+    profileName: document.querySelector("[data-profile-name]"),
+    profileEmail: document.querySelector("[data-profile-email]"),
+    averageScore: document.querySelector("[data-average-score]"),
+    subjectCount: document.querySelector("[data-subject-count]"),
+    gradeCount: document.querySelector("[data-grade-count]"),
+    studentGradesBody: document.querySelector("[data-student-grades-body]"),
+    studentList: document.querySelector("[data-student-list]"),
+    studentSelect: document.querySelector("[data-student-select]"),
+    teacherGradesBody: document.querySelector("[data-teacher-grades-body]"),
+    studentStatus: document.querySelector("[data-student-status]"),
+    gradeStatus: document.querySelector("[data-grade-status]"),
+    subjectChart: document.querySelector("#subject-chart"),
+    periodChart: document.querySelector("#period-chart"),
+  };
 
-  loginPanel.classList.add("is-hidden");
-  dashboard.classList.remove("is-hidden");
-});
+  const escapeHtml = (value = "") =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
 
-logoutButton?.addEventListener("click", () => {
-  dashboard.classList.add("is-hidden");
-  loginPanel.classList.remove("is-hidden");
-  loginForm.reset();
-});
+  const setStatus = (element, message, type = "info") => {
+    if (!element) return;
+    element.textContent = message;
+    element.style.color = type === "error" ? "var(--danger)" : "var(--success)";
+  };
 
-document.querySelectorAll(".tab-button").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
+  const showPortalAlert = (message, type = "info") => {
+    if (!portalEls.alert) return;
+    portalEls.alert.textContent = message;
+    portalEls.alert.dataset.type = type;
+    portalEls.alert.classList.toggle("is-hidden", !message);
+  };
 
+  const setActiveTab = (target) => {
     document.querySelectorAll(".tab-button").forEach((button) => {
-      button.classList.toggle("is-active", button === tab);
+      button.classList.toggle("is-active", button.dataset.tab === target);
     });
 
     document.querySelectorAll(".tab-panel").forEach((panel) => {
       panel.classList.toggle("is-hidden", panel.dataset.panel !== target);
     });
+  };
+
+  const loadPortalConfig = async () => {
+    if (window.JFK_SUPABASE_CONFIG?.supabaseUrl && window.JFK_SUPABASE_CONFIG?.supabaseAnonKey) {
+      return window.JFK_SUPABASE_CONFIG;
+    }
+
+    const response = await fetch("/api/portal-config");
+    if (!response.ok) {
+      throw new Error("No se encontro /api/portal-config. Ejecuta el sitio en Vercel y configura Supabase.");
+    }
+
+    const config = await response.json();
+    if (!config.supabaseUrl || !config.supabaseAnonKey) {
+      throw new Error("Faltan SUPABASE_URL o SUPABASE_ANON_KEY en Vercel.");
+    }
+
+    return config;
+  };
+
+  const initSupabaseClient = async () => {
+    if (!window.supabase?.createClient) {
+      throw new Error("No se cargo la libreria de Supabase desde el CDN.");
+    }
+
+    const config = await loadPortalConfig();
+    return window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    });
+  };
+
+  const requireClient = () => {
+    if (!portalState.client) {
+      throw new Error("Supabase no esta inicializado.");
+    }
+
+    return portalState.client;
+  };
+
+  const fetchProfile = async (userId) => {
+    const { data, error } = await requireClient()
+      .from("profiles")
+      .select("id, full_name, role")
+      .eq("id", userId)
+      .single();
+
+    if (error) throw new Error("Tu usuario no tiene perfil en la tabla profiles.");
+    return data;
+  };
+
+  const applyRoleVisibility = (role) => {
+    document.querySelectorAll("[data-role-tab]").forEach((tab) => {
+      tab.classList.toggle("is-hidden", tab.dataset.roleTab !== role);
+    });
+
+    document.querySelectorAll("[data-role-panel]").forEach((panel) => {
+      panel.classList.toggle("is-hidden", panel.dataset.rolePanel !== role);
+    });
+
+    setActiveTab(role === "teacher" ? "teacher-students" : "student-summary");
+  };
+
+  const showLogin = () => {
+    portalState.user = null;
+    portalState.profile = null;
+    portalState.students = [];
+    portalState.grades = [];
+    dashboard.classList.add("is-hidden");
+    loginPanel.classList.remove("is-hidden");
+    showPortalAlert("");
+  };
+
+  const showDashboard = () => {
+    loginPanel.classList.add("is-hidden");
+    dashboard.classList.remove("is-hidden");
+  };
+
+  const formatScore = (score) => Number(score || 0).toFixed(1);
+
+  const getSubjectName = (grade) => grade.subjects?.name || grade.subject_name || "Asignatura";
+
+  const average = (values) => {
+    if (!values.length) return 0;
+    return values.reduce((sum, value) => sum + Number(value || 0), 0) / values.length;
+  };
+
+  const groupAverages = (grades, keyGetter) => {
+    const groups = new Map();
+
+    grades.forEach((grade) => {
+      const key = keyGetter(grade);
+      const current = groups.get(key) || [];
+      current.push(Number(grade.score || 0));
+      groups.set(key, current);
+    });
+
+    return Array.from(groups.entries()).map(([label, scores]) => ({
+      label,
+      value: average(scores),
+    }));
+  };
+
+  const drawBarChart = (canvas, data, emptyMessage) => {
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = "#101a31";
+    context.fillRect(0, 0, width, height);
+    context.strokeStyle = "rgba(255,255,255,0.14)";
+    context.strokeRect(0.5, 0.5, width - 1, height - 1);
+
+    if (!data.length) {
+      context.fillStyle = "#9eacc7";
+      context.font = "18px DM Sans, Arial";
+      context.fillText(emptyMessage, 28, height / 2);
+      return;
+    }
+
+    const padding = 44;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+    const barGap = 18;
+    const barWidth = Math.max(28, (chartWidth - barGap * (data.length - 1)) / data.length);
+
+    context.strokeStyle = "rgba(255,255,255,0.18)";
+    context.beginPath();
+    context.moveTo(padding, padding);
+    context.lineTo(padding, height - padding);
+    context.lineTo(width - padding, height - padding);
+    context.stroke();
+
+    data.forEach((item, index) => {
+      const x = padding + index * (barWidth + barGap);
+      const barHeight = Math.max(4, (Math.min(item.value, 5) / 5) * chartHeight);
+      const y = height - padding - barHeight;
+
+      const gradient = context.createLinearGradient(0, y, 0, height - padding);
+      gradient.addColorStop(0, "#5ee4ff");
+      gradient.addColorStop(1, "#1847c8");
+
+      context.fillStyle = gradient;
+      context.fillRect(x, y, barWidth, barHeight);
+      context.fillStyle = "#eef4ff";
+      context.font = "700 15px DM Sans, Arial";
+      context.fillText(formatScore(item.value), x, y - 8);
+      context.fillStyle = "#9eacc7";
+      context.font = "12px DM Sans, Arial";
+      context.fillText(String(item.label).slice(0, 12), x, height - 16);
+    });
+  };
+
+  const renderStudentCharts = (grades) => {
+    const subjectData = groupAverages(grades, getSubjectName);
+    const periodData = groupAverages(grades, (grade) => `P${grade.period}`).sort((a, b) =>
+      a.label.localeCompare(b.label)
+    );
+
+    drawBarChart(portalEls.subjectChart, subjectData, "Aun no hay notas por asignatura.");
+    drawBarChart(portalEls.periodChart, periodData, "Aun no hay notas por periodo.");
+  };
+
+  const renderStudentGrades = (grades) => {
+    if (!portalEls.studentGradesBody) return;
+
+    if (!grades.length) {
+      portalEls.studentGradesBody.innerHTML = `<tr><td colspan="4">Aun no hay notas registradas.</td></tr>`;
+      return;
+    }
+
+    portalEls.studentGradesBody.innerHTML = grades
+      .map(
+        (grade) => `
+          <tr>
+            <td>${escapeHtml(getSubjectName(grade))}</td>
+            <td>Periodo ${escapeHtml(grade.period)}</td>
+            <td><strong>${formatScore(grade.score)}</strong></td>
+            <td>${escapeHtml(grade.observation || "Sin observacion")}</td>
+          </tr>`
+      )
+      .join("");
+  };
+
+  const loadStudentDashboard = async () => {
+    const { data: student, error: studentError } = await requireClient()
+      .from("students")
+      .select("id, full_name, grade_level, group_name")
+      .eq("profile_id", portalState.user.id)
+      .eq("active", true)
+      .maybeSingle();
+
+    if (studentError) throw studentError;
+
+    if (!student) {
+      showPortalAlert("Tu cuenta aun no esta vinculada a un estudiante. Pide al colegio que relacione tu usuario en Supabase.", "error");
+      renderStudentGrades([]);
+      renderStudentCharts([]);
+      return;
+    }
+
+    const { data: grades, error: gradesError } = await requireClient()
+      .from("grades")
+      .select("id, period, score, observation, subjects(name)")
+      .eq("student_id", student.id)
+      .order("period", { ascending: true });
+
+    if (gradesError) throw gradesError;
+
+    portalState.grades = grades || [];
+    const scores = portalState.grades.map((grade) => Number(grade.score || 0));
+    portalEls.averageScore.textContent = formatScore(average(scores));
+    portalEls.subjectCount.textContent = String(new Set(portalState.grades.map(getSubjectName)).size);
+    portalEls.gradeCount.textContent = String(portalState.grades.length);
+
+    renderStudentGrades(portalState.grades);
+    renderStudentCharts(portalState.grades);
+  };
+
+  const renderTeacherStudents = () => {
+    if (portalEls.studentSelect) {
+      portalEls.studentSelect.innerHTML = portalState.students.length
+        ? portalState.students
+            .map((student) => `<option value="${student.id}">${escapeHtml(student.full_name)} - ${escapeHtml(student.grade_level || "Sin grado")}</option>`)
+            .join("")
+        : `<option value="">No hay estudiantes activos</option>`;
+    }
+
+    if (!portalEls.studentList) return;
+
+    if (!portalState.students.length) {
+      portalEls.studentList.innerHTML = `<p class="muted">Aun no hay estudiantes activos.</p>`;
+      return;
+    }
+
+    portalEls.studentList.innerHTML = portalState.students
+      .map(
+        (student) => `
+          <article class="student-row">
+            <div>
+              <strong>${escapeHtml(student.full_name)}</strong>
+              <span>${escapeHtml(student.document_id || "Sin documento")} · Grado ${escapeHtml(student.grade_level || "-")} ${escapeHtml(student.group_name || "")}</span>
+            </div>
+            <button type="button" class="calendar-button" data-delete-student="${student.id}">Eliminar</button>
+          </article>`
+      )
+      .join("");
+  };
+
+  const renderTeacherGrades = () => {
+    if (!portalEls.teacherGradesBody) return;
+
+    if (!portalState.grades.length) {
+      portalEls.teacherGradesBody.innerHTML = `<tr><td colspan="5">Aun no hay notas registradas.</td></tr>`;
+      return;
+    }
+
+    portalEls.teacherGradesBody.innerHTML = portalState.grades
+      .map(
+        (grade) => `
+          <tr>
+            <td>${escapeHtml(grade.students?.full_name || "Estudiante")}</td>
+            <td>${escapeHtml(getSubjectName(grade))}</td>
+            <td>Periodo ${escapeHtml(grade.period)}</td>
+            <td><strong>${formatScore(grade.score)}</strong></td>
+            <td><button type="button" class="calendar-button" data-delete-grade="${grade.id}">Eliminar</button></td>
+          </tr>`
+      )
+      .join("");
+  };
+
+  const loadTeacherDashboard = async () => {
+    const { data: students, error: studentsError } = await requireClient()
+      .from("students")
+      .select("id, full_name, document_id, grade_level, group_name")
+      .eq("active", true)
+      .order("full_name", { ascending: true });
+
+    if (studentsError) throw studentsError;
+
+    const { data: grades, error: gradesError } = await requireClient()
+      .from("grades")
+      .select("id, period, score, observation, students(full_name), subjects(name)")
+      .order("created_at", { ascending: false });
+
+    if (gradesError) throw gradesError;
+
+    portalState.students = students || [];
+    portalState.grades = grades || [];
+    renderTeacherStudents();
+    renderTeacherGrades();
+  };
+
+  const loadDashboardData = async () => {
+    showPortalAlert("");
+
+    if (portalState.profile.role === "student") {
+      await loadStudentDashboard();
+      return;
+    }
+
+    if (portalState.profile.role === "teacher") {
+      await loadTeacherDashboard();
+      return;
+    }
+
+    showPortalAlert("Rol no permitido. Usa 'student' o 'teacher' en profiles.role.", "error");
+  };
+
+  const renderAuthenticatedPortal = async (session) => {
+    portalState.user = session.user;
+    portalState.profile = await fetchProfile(session.user.id);
+
+    portalEls.profileName.textContent = portalState.profile.full_name || "Usuario";
+    portalEls.profileEmail.textContent = session.user.email || "";
+    portalEls.roleLabel.textContent = portalState.profile.role === "teacher" ? "Portal profesor" : "Portal estudiante";
+
+    applyRoleVisibility(portalState.profile.role);
+    showDashboard();
+    await loadDashboardData();
+  };
+
+  const handlePortalError = (error) => {
+    const message = error?.message || "No se pudo completar la accion.";
+    showPortalAlert(message, "error");
+    setStatus(portalEls.loginStatus, message, "error");
+  };
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = loginForm.email.value.trim();
+    const password = loginForm.password.value.trim();
+
+    if (!email || !password) {
+      setStatus(portalEls.loginStatus, "Ingresa correo y contrasena.", "error");
+      return;
+    }
+
+    setStatus(portalEls.loginStatus, "Validando acceso...");
+
+    try {
+      const { data, error } = await requireClient().auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (data.session) await renderAuthenticatedPortal(data.session);
+      setStatus(portalEls.loginStatus, "");
+    } catch (error) {
+      handlePortalError(error);
+    }
   });
-});
+
+  logoutButton?.addEventListener("click", async () => {
+    await requireClient().auth.signOut();
+    loginForm.reset();
+    showLogin();
+  });
+
+  document.querySelectorAll(".tab-button").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      if (!tab.classList.contains("is-hidden")) setActiveTab(tab.dataset.tab);
+    });
+  });
+
+  document.querySelector("#student-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const payload = {
+      full_name: String(formData.get("full_name") || "").trim(),
+      document_id: String(formData.get("document_id") || "").trim(),
+      grade_level: String(formData.get("grade_level") || "").trim(),
+      group_name: String(formData.get("group_name") || "").trim() || null,
+      created_by: portalState.profile.id,
+    };
+
+    if (!payload.full_name || !payload.document_id || !payload.grade_level) {
+      setStatus(portalEls.studentStatus, "Completa nombre, documento y grado.", "error");
+      return;
+    }
+
+    try {
+      const { error } = await requireClient().from("students").insert(payload);
+      if (error) throw error;
+      setStatus(portalEls.studentStatus, "Estudiante anadido.");
+      form.reset();
+      await loadTeacherDashboard();
+    } catch (error) {
+      setStatus(portalEls.studentStatus, error.message, "error");
+    }
+  });
+
+  document.querySelector("#grade-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const subjectName = String(formData.get("subject_name") || "").trim();
+    const studentId = String(formData.get("student_id") || "");
+    const score = Number(formData.get("score"));
+
+    if (!studentId || !subjectName || Number.isNaN(score) || score < 0 || score > 5) {
+      setStatus(portalEls.gradeStatus, "Selecciona estudiante, asignatura y nota entre 0.0 y 5.0.", "error");
+      return;
+    }
+
+    try {
+      const { data: subject, error: subjectError } = await requireClient()
+        .from("subjects")
+        .upsert({ name: subjectName }, { onConflict: "name" })
+        .select("id")
+        .single();
+
+      if (subjectError) throw subjectError;
+
+      const payload = {
+        student_id: studentId,
+        subject_id: subject.id,
+        teacher_id: portalState.profile.id,
+        period: Number(formData.get("period")),
+        score,
+        observation: String(formData.get("observation") || "").trim() || null,
+      };
+
+      const { error } = await requireClient()
+        .from("grades")
+        .upsert(payload, { onConflict: "student_id,subject_id,period" });
+
+      if (error) throw error;
+      setStatus(portalEls.gradeStatus, "Nota guardada.");
+      form.reset();
+      await loadTeacherDashboard();
+    } catch (error) {
+      setStatus(portalEls.gradeStatus, error.message, "error");
+    }
+  });
+
+  portalEls.studentList?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-delete-student]");
+    if (!button) return;
+
+    try {
+      const { error } = await requireClient()
+        .from("students")
+        .update({ active: false })
+        .eq("id", button.dataset.deleteStudent);
+
+      if (error) throw error;
+      await loadTeacherDashboard();
+    } catch (error) {
+      showPortalAlert(error.message, "error");
+    }
+  });
+
+  portalEls.teacherGradesBody?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-delete-grade]");
+    if (!button) return;
+
+    try {
+      const { error } = await requireClient().from("grades").delete().eq("id", button.dataset.deleteGrade);
+      if (error) throw error;
+      await loadTeacherDashboard();
+    } catch (error) {
+      showPortalAlert(error.message, "error");
+    }
+  });
+
+  document.querySelector("[data-refresh-students]")?.addEventListener("click", loadTeacherDashboard);
+  document.querySelector("[data-refresh-grades]")?.addEventListener("click", loadTeacherDashboard);
+
+  const initPortal = async () => {
+    try {
+      portalState.client = await initSupabaseClient();
+      const { data } = await portalState.client.auth.getSession();
+
+      if (data.session) {
+        await renderAuthenticatedPortal(data.session);
+      }
+
+      portalState.client.auth.onAuthStateChange(async (_event, session) => {
+        if (!session) {
+          showLogin();
+          return;
+        }
+
+        await renderAuthenticatedPortal(session);
+      });
+    } catch (error) {
+      setStatus(portalEls.loginStatus, error.message, "error");
+      showPortalAlert(error.message, "error");
+    }
+  };
+
+  initPortal();
+}
 
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
