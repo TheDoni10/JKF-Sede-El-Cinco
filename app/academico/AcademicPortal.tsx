@@ -18,7 +18,7 @@ import type { LucideIcon } from "lucide-react";
 import type { GradeRecord, Student, StudentDashboard, Subject, Teacher, TeacherOverview } from "@/lib/types";
 
 type LoginMode = "student" | "teacher";
-type TeacherTab = "resumen" | "estudiantes" | "materias" | "notas" | "ranking";
+type TeacherTab = "resumen" | "estudiantes" | "profesores" | "materias" | "notas" | "ranking";
 
 type TeacherTabItem = [TeacherTab, string, LucideIcon];
 
@@ -28,6 +28,14 @@ type StudentForm = {
   apellidos: string;
   numero_documento: string;
   grado_id: string;
+  estado: "activo" | "inactivo";
+};
+
+type TeacherForm = {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  numero_documento: string;
   estado: "activo" | "inactivo";
 };
 
@@ -53,6 +61,14 @@ const initialStudentForm: StudentForm = {
   apellidos: "",
   numero_documento: "",
   grado_id: "",
+  estado: "activo",
+};
+
+const initialTeacherForm: TeacherForm = {
+  id: "",
+  nombre: "",
+  apellidos: "",
+  numero_documento: "",
   estado: "activo",
 };
 
@@ -155,12 +171,12 @@ export default function AcademicPortal() {
   const [mode, setMode] = useState<LoginMode>("student");
   const [studentDocument, setStudentDocument] = useState("");
   const [teacherDocument, setTeacherDocument] = useState("");
-  const [teacherSecret, setTeacherSecret] = useState("");
   const [studentDashboard, setStudentDashboard] = useState<StudentDashboard | null>(null);
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [overview, setOverview] = useState<TeacherOverview | null>(null);
   const [teacherTab, setTeacherTab] = useState<TeacherTab>("resumen");
   const [studentForm, setStudentForm] = useState<StudentForm>(initialStudentForm);
+  const [teacherForm, setTeacherForm] = useState<TeacherForm>(initialTeacherForm);
   const [subjectForm, setSubjectForm] = useState<SubjectForm>(initialSubjectForm);
   const [noteForm, setNoteForm] = useState<NoteForm>(initialNoteForm);
   const [search, setSearch] = useState("");
@@ -231,7 +247,7 @@ export default function AcademicPortal() {
     try {
       const data = await fetchJson<{ teacher: Teacher; overview: TeacherOverview }>("/api/academic/teacher/login", {
         method: "POST",
-        body: JSON.stringify({ document: teacherDocument, secret: teacherSecret }),
+        body: JSON.stringify({ document: teacherDocument }),
       });
       setTeacher(data.teacher);
       setOverview(data.overview);
@@ -249,7 +265,6 @@ export default function AcademicPortal() {
     setStudentDashboard(null);
     setTeacher(null);
     setOverview(null);
-    setTeacherSecret("");
     setStatus("");
   };
 
@@ -284,6 +299,44 @@ export default function AcademicPortal() {
     if (!window.confirm("Eliminar este estudiante y sus notas?")) return;
     await fetchJson(`/api/academic/students/${id}`, { method: "DELETE" });
     await refreshTeacher();
+  };
+
+  const saveTeacher = async (event: FormEvent) => {
+    event.preventDefault();
+    const url = teacherForm.id ? `/api/academic/teachers/${teacherForm.id}` : "/api/academic/teachers";
+    const method = teacherForm.id ? "PUT" : "POST";
+
+    try {
+      await fetchJson(url, { method, body: JSON.stringify(teacherForm) });
+      setTeacherForm(initialTeacherForm);
+      await refreshTeacher();
+      setStatus("Profesor guardado.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "No se pudo guardar el profesor.");
+    }
+  };
+
+  const editTeacher = (item: Teacher) => {
+    setTeacherForm({
+      id: item.id,
+      nombre: item.nombre,
+      apellidos: item.apellidos,
+      numero_documento: item.numero_documento,
+      estado: item.estado,
+    });
+    setTeacherTab("profesores");
+  };
+
+  const deleteTeacher = async (id: string) => {
+    if (!window.confirm("Eliminar este profesor?")) return;
+
+    try {
+      await fetchJson(`/api/academic/teachers/${id}`, { method: "DELETE" });
+      await refreshTeacher();
+      setStatus("Profesor eliminado.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "No se pudo eliminar el profesor.");
+    }
   };
 
   const saveSubject = async (event: FormEvent) => {
@@ -392,18 +445,9 @@ export default function AcademicPortal() {
           </form>
         ) : (
           <form className="form-grid" onSubmit={loginTeacher}>
-            <label>
-              Documento
+            <label className="field-full">
+              Cedula de profesor
               <input value={teacherDocument} onChange={(event) => setTeacherDocument(event.target.value)} required />
-            </label>
-            <label>
-              Clave de profesor
-              <input
-                type="password"
-                value={teacherSecret}
-                onChange={(event) => setTeacherSecret(event.target.value)}
-                required
-              />
             </label>
             <button className="button primary field-full" disabled={loading} type="submit">
               <Users size={18} /> Entrar como profesor
@@ -517,7 +561,7 @@ export default function AcademicPortal() {
           <div>
             <p className="eyebrow">Portal de profesores</p>
             <h1>{fullName(teacher)}</h1>
-            <p className="muted">Administracion academica completa - Documento {teacher.numero_documento}</p>
+            <p className="muted">Administracion academica completa - Cedula {teacher.numero_documento}</p>
           </div>
           <div className="actions">
             <button className="button ghost" type="button" onClick={() => refreshTeacher()}>
@@ -533,6 +577,7 @@ export default function AcademicPortal() {
           {([
             ["resumen", "Resumen", BarChart3],
             ["estudiantes", "Estudiantes", Users],
+            ["profesores", "Profesores", Users],
             ["materias", "Materias", BookOpen],
             ["notas", "Notas", ClipboardList],
             ["ranking", "Ranking", GraduationCap],
@@ -553,6 +598,7 @@ export default function AcademicPortal() {
             <section className="metric-grid">
               <Metric label="Grados" value={overview.grades.length} />
               <Metric label="Estudiantes" value={overview.students.length} />
+              <Metric label="Profesores" value={overview.teachers.length} />
               <Metric label="Materias" value={overview.subjects.length} />
               <Metric label="Notas" value={overview.notes.length} />
             </section>
@@ -599,6 +645,48 @@ export default function AcademicPortal() {
                         </td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+        )}
+
+        {teacherTab === "profesores" && (
+          <section className="teacher-grid">
+            <form className="form-card form-grid" onSubmit={saveTeacher}>
+              <h2 className="field-full">{teacherForm.id ? "Editar profesor" : "Crear profesor"}</h2>
+              <label>Nombre<input value={teacherForm.nombre} onChange={(event) => setTeacherForm({ ...teacherForm, nombre: event.target.value })} required /></label>
+              <label>Apellidos<input value={teacherForm.apellidos} onChange={(event) => setTeacherForm({ ...teacherForm, apellidos: event.target.value })} required /></label>
+              <label>Cedula<input value={teacherForm.numero_documento} onChange={(event) => setTeacherForm({ ...teacherForm, numero_documento: event.target.value })} required /></label>
+              <label>Estado<select value={teacherForm.estado} onChange={(event) => setTeacherForm({ ...teacherForm, estado: event.target.value as TeacherForm["estado"] })}><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></label>
+              <div className="actions field-full">
+                <button className="button primary" type="submit"><Save size={18} /> Guardar</button>
+                <button className="button" type="button" onClick={() => setTeacherForm(initialTeacherForm)}>Limpiar</button>
+              </div>
+            </form>
+
+            <article className="table-card">
+              <div className="table-wrap">
+                <table>
+                  <thead><tr><th>Profesor</th><th>Cedula</th><th>Estado</th><th>Acciones</th></tr></thead>
+                  <tbody>
+                    {overview.teachers.map((item) => (
+                      <tr key={item.id}>
+                        <td>{fullName(item)}</td>
+                        <td>{item.numero_documento}</td>
+                        <td><span className={`pill ${item.estado === "inactivo" ? "inactive" : ""}`}>{item.estado}</span></td>
+                        <td className="actions">
+                          <button className="button ghost" type="button" onClick={() => editTeacher(item)}><Pencil size={16} /></button>
+                          <button className="button" type="button" onClick={() => deleteTeacher(item.id)}><Trash2 size={16} /></button>
+                        </td>
+                      </tr>
+                    ))}
+                    {!overview.teachers.length && (
+                      <tr>
+                        <td colSpan={4}>Aun no hay profesores registrados.</td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -84,6 +84,7 @@ export type TeacherOverview = {
   grades: Grade[];
   periods: Period[];
   students: Student[];
+  teachers: Teacher[];
   subjects: Array<Subject & { gradeIds: number[] }>;
   notes: GradeRecord[];
   rankings: Array<RankingRecord & { estudiantes?: Student | null }>;

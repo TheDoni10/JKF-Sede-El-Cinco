@@ -15,7 +15,6 @@ export type AcademicSession = {
 
 const getSecret = () =>
   process.env.ACADEMIC_SESSION_SECRET ||
-  process.env.TEACHER_PORTAL_SECRET ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   "jfk-academic-dev-secret";
 

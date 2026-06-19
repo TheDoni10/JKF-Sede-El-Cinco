@@ -33,12 +33,13 @@ SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_ANON_KEY=tu_clave_publica
 SUPABASE_SERVICE_ROLE_KEY=tu_clave_secreta
 ACADEMIC_SESSION_SECRET=texto_largo_aleatorio
-TEACHER_PORTAL_SECRET=clave_para_profesores
 ```
 
 Ejecuta `supabase-schema.sql` en Supabase SQL Editor antes de probar.
 
 Accesos demo despues de ejecutar el SQL:
 
-- Estudiante: documento `12345`.
-- Profesor: documento `1000` y la clave definida en `TEACHER_PORTAL_SECRET`.
+- Estudiante: documento `1046907616`.
+- Profesor: cedula `1001001001`.
+
+En este portal los estudiantes entran con su documento de identidad y los profesores con su cedula. Desde el panel de profesores se pueden administrar estudiantes, profesores, materias y notas.

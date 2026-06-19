@@ -4,7 +4,7 @@
 
 El proyecto ahora conserva el sitio institucional existente y agrega un modulo academico en Next.js/React bajo la ruta `/academico`.
 
-El portal academico usa Supabase como base de datos principal mediante APIs server-side de Next/Vercel. Los estudiantes ingresan con numero de documento. Los profesores ingresan con numero de documento y la variable `TEACHER_PORTAL_SECRET`.
+El portal academico usa Supabase como base de datos principal mediante APIs server-side de Next/Vercel. Los estudiantes ingresan con numero de documento. Los profesores ingresan con cedula registrada en la tabla `profesores`.
 
 No se pudo compilar localmente en esta maquina porque `npm` no esta instalado o no esta disponible en PowerShell.
 
@@ -29,6 +29,8 @@ No se pudo compilar localmente en esta maquina porque `npm` no esta instalado o 
   - `app/api/academic/logout/route.ts`
   - `app/api/academic/students/route.ts`
   - `app/api/academic/students/[id]/route.ts`
+  - `app/api/academic/teachers/route.ts`
+  - `app/api/academic/teachers/[id]/route.ts`
   - `app/api/academic/subjects/route.ts`
   - `app/api/academic/subjects/[id]/route.ts`
   - `app/api/academic/notes/route.ts`
@@ -50,7 +52,8 @@ No se pudo compilar localmente en esta maquina porque `npm` no esta instalado o 
 - Las operaciones sensibles contra Supabase se hacen en APIs de servidor usando `SUPABASE_SERVICE_ROLE_KEY`.
 - La clave secreta de Supabase nunca debe ir al frontend.
 - Los estudiantes no usan contrasena; ingresan por documento.
-- Los profesores usan documento + `TEACHER_PORTAL_SECRET`.
+- Los profesores usan su cedula registrada como acceso.
+- El panel profesor administra estudiantes, profesores, materias y notas.
 - Promedios, rankings e historial se recalculan en Supabase con `refresh_academic_rollups()`.
 - Las notas tienen escala de 0 a 5 y son unicas por estudiante, materia y periodo.
 
@@ -63,7 +66,6 @@ SUPABASE_URL
 SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 ACADEMIC_SESSION_SECRET
-TEACHER_PORTAL_SECRET
 GROQ_API_KEY
 ```
 
@@ -89,10 +91,9 @@ Datos iniciales:
 - Periodos 1 a 4.
 - Materias base.
 - Profesor demo:
-  - Documento: `1000`
-  - Clave: valor de `TEACHER_PORTAL_SECRET`
+  - Cedula: `1001001001`
 - Estudiante demo:
-  - Documento: `12345`
+  - Documento: `1046907616`
 
 ## Pendientes
 
@@ -116,7 +117,7 @@ npm run build
 2. Confirmar variables de entorno en Vercel con nombres exactos.
 3. Hacer redeploy.
 4. Abrir `/academico`.
-5. Probar estudiante demo con documento `12345`.
-6. Probar profesor demo con documento `1000` y la clave configurada en `TEACHER_PORTAL_SECRET`.
-7. Crear estudiantes reales desde el panel profesor.
+5. Probar estudiante demo con documento `1046907616`.
+6. Probar profesor demo con cedula `1001001001`.
+7. Crear estudiantes y profesores reales desde el panel profesor.
 8. Registrar notas y validar que promedios, rankings e historial cambien automaticamente.

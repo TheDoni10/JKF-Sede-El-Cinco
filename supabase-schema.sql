@@ -265,16 +265,115 @@ cross join public.materias m
 on conflict (grado_id, materia_id) do nothing;
 
 insert into public.profesores (nombre, apellidos, numero_documento, estado)
-values ('Profesor', 'Administrador', '1000', 'activo')
-on conflict (numero_documento) do nothing;
-
-insert into public.estudiantes (nombre, apellidos, numero_documento, grado_id, estado)
 values
-  ('Estudiante', 'Demo', '12345', 8, 'activo')
-on conflict (numero_documento) do nothing;
+  ('Ana Maria', 'Rios Gomez', '1001001001', 'activo'),
+  ('Carlos Andres', 'Gomez Perez', '1001001002', 'activo'),
+  ('Luz Elena', 'Martinez Castro', '1001001003', 'activo'),
+  ('Miguel Angel', 'Torres Ramirez', '1001001004', 'activo'),
+  ('Patricia Fernanda', 'Lopez Herrera', '1001001005', 'activo')
+on conflict (numero_documento) do update set
+  nombre = excluded.nombre,
+  apellidos = excluded.apellidos,
+  estado = excluded.estado;
+
+with student_seed as (
+  select nombre, apellidos, numero_documento, grado_id, estado
+  from (
+    values
+      ('Juan Daniel', 'Villa', '1046907616', 6::smallint, 'activo')
+  ) as manual(nombre, apellidos, numero_documento, grado_id, estado)
+
+  union all
+
+  select
+    nombres[((n - 1) % array_length(nombres, 1)) + 1],
+    apellido_uno[(((n - 1) * 5) % array_length(apellido_uno, 1)) + 1] || ' ' ||
+      apellido_dos[(((n - 1) * 7) % array_length(apellido_dos, 1)) + 1],
+    (1046908000 + n)::text,
+    (((n - 1) % 12) + 1)::smallint,
+    'activo'
+  from generate_series(1, 119) as series(n)
+  cross join (
+    select
+      array[
+        'Samuel Andres',
+        'Maria Jose',
+        'Santiago',
+        'Valentina',
+        'Sebastian',
+        'Isabella',
+        'Mateo',
+        'Camila',
+        'Nicolas',
+        'Luciana',
+        'Daniel Felipe',
+        'Mariana',
+        'Emmanuel',
+        'Salome',
+        'David Alejandro',
+        'Gabriela',
+        'Tomas'
+      ]::text[] as nombres,
+      array[
+        'Garcia',
+        'Rodriguez',
+        'Martinez',
+        'Lopez',
+        'Gomez',
+        'Perez',
+        'Sanchez',
+        'Ramirez',
+        'Torres',
+        'Diaz',
+        'Vargas',
+        'Castro',
+        'Moreno',
+        'Rojas',
+        'Herrera',
+        'Molina',
+        'Ortiz',
+        'Jimenez',
+        'Ruiz'
+      ]::text[] as apellido_uno,
+      array[
+        'Restrepo',
+        'Hernandez',
+        'Quintero',
+        'Cardona',
+        'Arias',
+        'Mendez',
+        'Cano',
+        'Giraldo',
+        'Mejia',
+        'Suarez',
+        'Velasquez',
+        'Montoya',
+        'Ospina',
+        'Londono',
+        'Cifuentes',
+        'Agudelo',
+        'Florez',
+        'Valencia',
+        'Barrera',
+        'Escobar',
+        'Serna',
+        'Pineda',
+        'Salazar',
+        'Duque'
+      ]::text[] as apellido_dos
+  ) as catalog
+)
+insert into public.estudiantes (nombre, apellidos, numero_documento, grado_id, estado)
+select nombre, apellidos, numero_documento, grado_id, estado
+from student_seed
+on conflict (numero_documento) do update set
+  nombre = excluded.nombre,
+  apellidos = excluded.apellidos,
+  grado_id = excluded.grado_id,
+  estado = excluded.estado;
 
 select public.refresh_academic_rollups();
 
 -- Accesos iniciales para probar:
--- Profesor: documento 1000 + TEACHER_PORTAL_SECRET
--- Estudiante: documento 12345
+-- Profesor: cedula 1001001001
+-- Estudiante: documento 1046907616

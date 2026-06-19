@@ -129,6 +129,7 @@ export const getTeacherOverview = async (): Promise<TeacherOverview> => {
     gradesResult,
     periodsResult,
     studentsResult,
+    teachersResult,
     subjectsResult,
     subjectGradesResult,
     notesResult,
@@ -139,6 +140,10 @@ export const getTeacherOverview = async (): Promise<TeacherOverview> => {
     supabase
       .from("estudiantes")
       .select("id,nombre,apellidos,numero_documento,estado,created_at,grado_id,grados(id,nombre,orden)")
+      .order("apellidos", { ascending: true }),
+    supabase
+      .from("profesores")
+      .select("id,nombre,apellidos,numero_documento,estado,created_at")
       .order("apellidos", { ascending: true }),
     supabase.from("materias").select("id,nombre,estado,created_at").order("nombre", { ascending: true }),
     supabase.from("grado_materias").select("grado_id,materia_id"),
@@ -156,6 +161,7 @@ export const getTeacherOverview = async (): Promise<TeacherOverview> => {
     gradesResult.error,
     periodsResult.error,
     studentsResult.error,
+    teachersResult.error,
     subjectsResult.error,
     subjectGradesResult.error,
     notesResult.error,
@@ -197,6 +203,7 @@ export const getTeacherOverview = async (): Promise<TeacherOverview> => {
     grades: gradesResult.data || [],
     periods: periodsResult.data || [],
     students,
+    teachers: teachersResult.data || [],
     subjects,
     notes,
     rankings: (rankingsResult.data || []) as TeacherOverview["rankings"],
