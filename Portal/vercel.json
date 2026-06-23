@@ -1,0 +1,38 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "redirects": [
+    {
+      "source": "/portal.html",
+      "destination": "/portal",
+      "permanent": false
+    },
+    {
+      "source": "/academico",
+      "destination": "/portal",
+      "permanent": false
+    }
+  ],
+  "env": [
+    {
+      "key": "NEXT_PUBLIC_SUPABASE_URL",
+      "description": "URL de tu proyecto Supabase"
+    },
+    {
+      "key": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "description": "Clave pública de Supabase"
+    },
+    {
+      "key": "SUPABASE_SERVICE_ROLE_KEY",
+      "description": "Clave de servicio de Supabase (privada)",
+      "scope": "runtime"
+    },
+    {
+      "key": "NEXT_PUBLIC_PORTAL_BASE_PATH",
+      "description": "Ruta base del portal",
+      "value": "/portal"
+    }
+  ]
+}
