@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/portal.html",
+      "destination": "/portal",
+      "permanent": false
+    },
+    {
+      "source": "/academico",
+      "destination": "/portal",
+      "permanent": false
+    }
+  ]
+}

@@ -24,7 +24,7 @@ Si la clave anterior estuvo en GitHub, revocala en Groq y crea una nueva.
 
 ## Portal academico con Supabase
 
-El modulo academico vive en `/academico` y usa Next.js, React, Vercel y Supabase.
+El modulo academico vive en `/portal` y usa Next.js, React, Vercel y Supabase.
 
 Variables requeridas en Vercel:
 
@@ -34,6 +34,8 @@ SUPABASE_ANON_KEY=tu_clave_publica
 SUPABASE_SERVICE_ROLE_KEY=tu_clave_secreta
 ACADEMIC_SESSION_SECRET=texto_largo_aleatorio
 ```
+
+Si la integracion de Vercel/Supabase crea `SUPABASE_SECRET_KEY` en lugar de `SUPABASE_SERVICE_ROLE_KEY`, tambien funciona.
 
 Ejecuta `supabase-schema.sql` en Supabase SQL Editor antes de probar.
 
