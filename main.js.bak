@@ -11,14 +11,12 @@ window.addEventListener("scroll", updateHeader, { passive: true });
 
 menuToggle?.addEventListener("click", () => {
   const isOpen = navLinks.classList.toggle("is-open");
-  menuToggle.classList.toggle("is-open", isOpen);
   menuToggle.setAttribute("aria-expanded", String(isOpen));
 });
 
 navLinks?.addEventListener("click", (event) => {
   if (event.target.matches("a")) {
     navLinks.classList.remove("is-open");
-    menuToggle.classList.remove("is-open");
     menuToggle.setAttribute("aria-expanded", "false");
   }
 });
@@ -91,30 +89,20 @@ if ("IntersectionObserver" in window) {
 const contactForm = document.querySelector("#contact-form");
 const contactStatus = contactForm?.querySelector(".form-status");
 
-const setFieldValidity = (field, isValid) => {
-  field.classList.toggle("invalid", !isValid);
-  field.classList.toggle("valid", isValid);
-};
-
 contactForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const fields = Array.from(contactForm.querySelectorAll("input, textarea"));
-  const emptyFields = fields.filter((field) => !field.value.trim());
+  const hasEmpty = fields.some((field) => !field.value.trim());
 
-  fields.forEach((field) => setFieldValidity(field, Boolean(field.value.trim())));
-  contactStatus?.classList.remove("status-error", "status-success");
-
-  if (emptyFields.length) {
+  if (hasEmpty) {
     contactStatus.textContent = "Completa todos los campos para enviar el mensaje.";
-    contactStatus?.classList.add("status-error");
-    emptyFields[0]?.focus();
+    contactStatus.style.color = "var(--danger)";
     return;
   }
 
   contactStatus.textContent = "Mensaje listo. Conecta este formulario a correo o backend cuando publiques el sitio.";
-  contactStatus?.classList.add("status-success");
+  contactStatus.style.color = "var(--success)";
   contactForm.reset();
-  fields.forEach((field) => setFieldValidity(field, false));
 });
 
 const eventCards = document.querySelectorAll(".event-card");
@@ -370,424 +358,48 @@ const loadGoogleEducationNews = async () => {
 
 loadGoogleEducationNews();
 
-const galleryItems = Array.from(document.querySelectorAll(".gallery-item"));
-const galleryFilters = Array.from(document.querySelectorAll(".gallery-filter-bar .filter-pill"));
-const gallerySearchInput = document.querySelector("#gallery-search");
-const galleryFolderLabel = document.querySelector(".gallery-folder");
-const galleryEmptyState = document.querySelector(".gallery-empty-state");
 const lightbox = document.querySelector("#lightbox");
+const lightboxCaption = document.querySelector(".lightbox-caption");
 const lightboxFrame = document.querySelector(".lightbox-frame");
 const lightboxClose = document.querySelector(".lightbox-close");
-const lightboxTitle = document.querySelector(".lightbox-title");
-const lightboxDescription = document.querySelector(".lightbox-description");
-const lightboxDetails = document.querySelector(".lightbox-details");
-const lightboxCounter = document.querySelector(".lightbox-counter");
-const lightboxPrev = document.querySelector(".lightbox-prev");
-const lightboxNext = document.querySelector(".lightbox-next");
-const lightboxDownload = document.querySelector(".lightbox-download");
-const lightboxShare = document.querySelector(".lightbox-share");
-const lightboxZoom = document.querySelector(".lightbox-zoom");
-let galleryIndex = 0;
-let activeGalleryFilter = "Eventos";
-let gallerySearchQuery = "";
-const favoritesKey = "jfk-gallery-favorites";
 
-const toastContainer = document.createElement("div");
-toastContainer.className = "toast-notification-container";
-document.body.appendChild(toastContainer);
+document.querySelectorAll("[data-lightbox]").forEach((item) => {
+  item.addEventListener("click", () => {
+    const image = item.querySelector("img");
+    lightboxCaption.textContent = item.dataset.lightbox;
 
-const showToast = (message) => {
-  const toast = document.createElement("div");
-  toast.className = "toast-notification visible";
-  toast.textContent = message;
-  toastContainer.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.remove("visible");
-    toast.addEventListener("transitionend", () => toast.remove(), { once: true });
-  }, 2400);
-};
+    if (lightboxFrame) {
+      lightboxFrame.textContent = "";
 
-const loadFavoriteIds = () => {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(favoritesKey)) || []);
-  } catch {
-    return new Set();
-  }
-};
-
-const saveFavoriteIds = (ids) => {
-  localStorage.setItem(favoritesKey, JSON.stringify(Array.from(ids)));
-};
-
-const updateFavoriteCount = (ids) => {
-  const countEl = document.querySelector("#favorite-count");
-  if (countEl) {
-    countEl.textContent = String(ids.size);
-  }
-};
-
-const favoriteIds = loadFavoriteIds();
-
-const visibleGalleryItems = () => galleryItems.filter((item) => !item.classList.contains("is-hidden"));
-
-const createFavoriteToggle = (item) => {
-  if (item.querySelector(".favorite-toggle")) return;
-  const toggle = document.createElement("span");
-  toggle.className = "favorite-toggle";
-  toggle.setAttribute("role", "button");
-  toggle.setAttribute("tabindex", "0");
-  toggle.setAttribute("aria-label", "Marcar como favorito");
-  toggle.textContent = "♥";
-  item.appendChild(toggle);
-
-  const itemId = item.dataset.galleryId || item.dataset.lightbox || item.querySelector("img")?.src || `image-${galleryItems.indexOf(item)}`;
-  item.dataset.galleryId = itemId;
-
-  const syncToggle = () => {
-    const isFavorite = favoriteIds.has(itemId);
-    toggle.classList.toggle("is-favorite", isFavorite);
-    toggle.setAttribute("aria-pressed", String(isFavorite));
-  };
-
-  const toggleFavorite = () => {
-    if (favoriteIds.has(itemId)) {
-      favoriteIds.delete(itemId);
-      showToast("Favorito removido");
-    } else {
-      favoriteIds.add(itemId);
-      showToast("Foto guardada en favoritos");
+      if (image) {
+        const largeImage = document.createElement("img");
+        largeImage.src = image.currentSrc || image.src;
+        largeImage.alt = image.alt || item.dataset.lightbox || "Imagen de galeria";
+        lightboxFrame.appendChild(largeImage);
+      } else {
+        lightboxFrame.textContent = "Imagen ampliada";
+      }
     }
-    saveFavoriteIds(favoriteIds);
-    updateFavoriteCount(favoriteIds);
-    syncToggle();
-  };
 
-  toggle.addEventListener("click", (event) => {
-    event.stopPropagation();
-    toggleFavorite();
+    lightbox.classList.add("is-open");
+    document.body.classList.add("no-scroll");
   });
-  toggle.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      event.stopPropagation();
-      toggleFavorite();
-    }
-  });
-
-  syncToggle();
-};
-
-const buildLightboxDetails = (item) => {
-  const metadata = [];
-  if (item.dataset.event) metadata.push(`Evento: ${item.dataset.event}`);
-  if (item.dataset.location) metadata.push(`Lugar: ${item.dataset.location}`);
-  if (item.dataset.date) metadata.push(`Fecha: ${item.dataset.date}`);
-  if (item.dataset.author) metadata.push(`Autor: ${item.dataset.author}`);
-  return metadata.join(" · ");
-};
-
-const updateLightbox = (item) => {
-  const image = item.querySelector("img");
-  const title = item.dataset.lightbox || "Galería";
-  const description = item.dataset.description || "Foto institucional de la sede.";
-  const items = visibleGalleryItems();
-  const index = items.indexOf(item);
-  galleryIndex = index >= 0 ? index : 0;
-
-  if (!lightboxFrame || !image) return;
-
-  lightboxFrame.innerHTML = "";
-  const largeImage = document.createElement("img");
-  largeImage.src = image.currentSrc || image.src;
-  largeImage.alt = image.alt || title;
-  lightboxFrame.appendChild(largeImage);
-  lightboxTitle.textContent = title;
-  lightboxDescription.textContent = description;
-  if (lightboxDetails) {
-    lightboxDetails.textContent = buildLightboxDetails(item);
-  }
-  lightboxCounter.textContent = `${galleryIndex + 1} / ${items.length}`;
-
-  if (lightboxDownload) {
-    lightboxDownload.dataset.src = largeImage.src;
-    lightboxDownload.dataset.title = title;
-  }
-};
-
-const updateFilterAvailability = () => {
-  const categoryCounts = galleryItems.reduce((counts, item) => {
-    const category = item.dataset.category?.trim() || "Todas";
-    counts[category] = (counts[category] || 0) + 1;
-    return counts;
-  }, {});
-
-  galleryFilters.forEach((button) => {
-    const filter = button.dataset.filter || "Todas";
-    const available = filter === "Todas" || Boolean(categoryCounts[filter]);
-    button.disabled = !available;
-    button.setAttribute("aria-disabled", String(!available));
-  });
-};
-
-const setEmptyState = (visibleCount) => {
-  if (!galleryEmptyState) return;
-  galleryEmptyState.hidden = visibleCount > 0;
-  galleryEmptyState.setAttribute("aria-hidden", String(visibleCount > 0));
-};
-
-const updateFolderLabel = (filter) => {
-  if (!galleryFolderLabel) return;
-  galleryFolderLabel.textContent =
-    filter === "Eventos"
-      ? "Carpeta: Carrusel de Sonrisas 2026"
-      : "Carpeta: Carrusel de Sonrisas";
-};
-
-const openLightbox = (item) => {
-  updateLightbox(item);
-  lightbox?.classList.add("is-open");
-  document.body.classList.add("no-scroll");
-  lightboxClose?.focus();
-};
+});
 
 const closeLightbox = () => {
   lightbox?.classList.remove("is-open");
   document.body.classList.remove("no-scroll");
 };
 
-const showGalleryItem = (item) => item.classList.remove("is-hidden");
-const hideGalleryItem = (item) => item.classList.add("is-hidden");
-
-const applyFilter = (filter) => {
-  activeGalleryFilter = filter;
-  galleryFilters.forEach((button) => button.classList.toggle("is-active", button.dataset.filter === filter));
-  let visibleCount = 0;
-
-  galleryItems.forEach((item) => {
-    const category = item.dataset.category || "Todas";
-    const searchable = [
-      item.dataset.lightbox,
-      item.dataset.description,
-      item.dataset.event,
-      item.dataset.location,
-      item.dataset.author,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    const matchesFilter = filter === "Todas" || category === filter;
-    const matchesSearch = !gallerySearchQuery || searchable.includes(gallerySearchQuery);
-
-    if (matchesFilter && matchesSearch) {
-      showGalleryItem(item);
-      visibleCount += 1;
-    } else {
-      hideGalleryItem(item);
-    }
-  });
-
-  setEmptyState(visibleCount);
-  updateFolderLabel(filter);
-
-  if (visibleCount && galleryFilters.some((button) => button.dataset.filter === filter)) {
-    const items = visibleGalleryItems();
-    const selectedIndex = items.findIndex((item) => !item.classList.contains("is-hidden"));
-    galleryIndex = selectedIndex >= 0 ? selectedIndex : 0;
-  }
-};
-
-galleryFilters.forEach((button) => {
-  button.addEventListener("click", () => applyFilter(button.dataset.filter || "Todas"));
-});
-
-gallerySearchInput?.addEventListener("input", (event) => {
-  gallerySearchQuery = event.target.value.toLowerCase().trim();
-  applyFilter(activeGalleryFilter);
-});
-
-galleryItems.forEach((item) => {
-  createFavoriteToggle(item);
-  item.addEventListener("click", (event) => {
-    if (event.target.closest(".favorite-toggle")) return;
-    openLightbox(item);
-  });
-  item.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      openLightbox(item);
-    }
-  });
-});
-
-updateFilterAvailability();
-applyFilter(activeGalleryFilter);
-updateFavoriteCount(favoriteIds);
-
-lightboxPrev?.addEventListener("click", () => {
-  const items = visibleGalleryItems();
-  if (!items.length) return;
-  galleryIndex = (galleryIndex - 1 + items.length) % items.length;
-  updateLightbox(items[galleryIndex]);
-});
-
-lightboxNext?.addEventListener("click", () => {
-  const items = visibleGalleryItems();
-  if (!items.length) return;
-  galleryIndex = (galleryIndex + 1) % items.length;
-  updateLightbox(items[galleryIndex]);
-});
-
-lightboxDownload?.addEventListener("click", () => {
-  const src = lightboxDownload.dataset.src;
-  const title = lightboxDownload.dataset.title?.replace(/\W+/g, "_") || "imagen";
-  if (!src) return;
-  const link = document.createElement("a");
-  link.href = src;
-  link.download = `${title}.jpg`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-});
-
-lightboxShare?.addEventListener("click", async () => {
-  if (navigator.share) {
-    const items = visibleGalleryItems();
-    const item = items[galleryIndex];
-    const title = item?.dataset.lightbox || "Galeria JFK";
-    const url = window.location.href;
-    try {
-      await navigator.share({ title, text: title, url });
-      showToast("Compartiendo imagen...");
-    } catch (error) {
-      console.warn("Compartir cancelado", error);
-      showToast("No se pudo compartir en este dispositivo.");
-    }
-  } else {
-    await navigator.clipboard?.writeText(window.location.href);
-    showToast("Enlace copiado al portapapeles.");
-  }
-});
-
-lightboxZoom?.addEventListener("click", () => {
-  const image = lightboxFrame.querySelector("img");
-  if (!image) return;
-  image.classList.toggle("zoomed");
-  image.style.transition = "transform 260ms ease";
-});
-
 lightboxClose?.addEventListener("click", closeLightbox);
 lightbox?.addEventListener("click", (event) => {
   if (event.target === lightbox) closeLightbox();
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeLightbox();
-    return;
-  }
-  if (!lightbox?.classList.contains("is-open")) return;
-  if (event.key === "ArrowLeft") {
-    lightboxPrev?.click();
-  }
-  if (event.key === "ArrowRight") {
-    lightboxNext?.click();
-  }
-  if (event.key === "+" || event.key === "=") {
-    lightboxZoom?.click();
-  }
+  if (event.key === "Escape") closeLightbox();
 });
 
-const newsSearchInput = document.querySelector("#news-search");
-const newsFilters = Array.from(document.querySelectorAll(".news-filter-pill"));
-const newsCards = Array.from(document.querySelectorAll(".news-card"));
-const featuredShare = document.querySelector("#featured-share");
-const featuredView = document.querySelector("#featured-view");
-const newsEmptyState = document.querySelector(".news-empty-state");
-let activeNewsFilter = "Todas";
-let newsSearchQuery = "";
-
-const renderNewsEmptyState = (visibleCount) => {
-  if (!newsEmptyState) return;
-  newsEmptyState.hidden = visibleCount > 0;
-};
-
-const applyNewsFilter = (filter) => {
-  activeNewsFilter = filter;
-  newsFilters.forEach((button) => button.classList.toggle("is-active", button.dataset.filter === filter));
-
-  let visibleCount = 0;
-  newsCards.forEach((card) => {
-    const category = card.dataset.eventCategory || card.querySelector(".tag")?.textContent || "";
-    const title = card.dataset.eventTitle?.toLowerCase() || card.querySelector("h3")?.textContent.toLowerCase() || "";
-    const description = card.dataset.eventDescription?.toLowerCase() || card.querySelector("p")?.textContent.toLowerCase() || "";
-    const search = `${category} ${title} ${description}`;
-
-    const matchesFilter = filter === "Todas" || category.toLowerCase() === filter.toLowerCase();
-    const matchesSearch = !newsSearchQuery || search.includes(newsSearchQuery);
-
-    const shouldShow = matchesFilter && matchesSearch;
-    card.classList.toggle("is-hidden", !shouldShow);
-    if (shouldShow) visibleCount += 1;
-  });
-
-  renderNewsEmptyState(visibleCount);
-};
-
-newsFilters.forEach((button) => {
-  button.addEventListener("click", () => applyNewsFilter(button.dataset.filter || "Todas"));
-});
-
-newsSearchInput?.addEventListener("input", (event) => {
-  newsSearchQuery = event.target.value.toLowerCase().trim();
-  applyNewsFilter(activeNewsFilter);
-});
-
-featuredShare?.addEventListener("click", async () => {
-  const shareTitle = "Semana cultural: celebra el talento escolar";
-  const shareText = "Descubre los eventos que inspiran a la comunidad educativa en nuestra sede.";
-  const shareUrl = window.location.href;
-
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-      showToast("Enlace compartido correctamente.");
-    } catch {
-      showToast("Compartir cancelado.");
-    }
-  } else {
-    await navigator.clipboard?.writeText(`${shareTitle} - ${shareUrl}`);
-    showToast("Enlace de noticia destacado copiado.");
-  }
-});
-
-featuredView?.addEventListener("click", (event) => {
-  event.preventDefault();
-  document.querySelector("#news-events")?.scrollIntoView({ behavior: "smooth" });
-});
-
-const eventShareButtons = Array.from(document.querySelectorAll(".share-button"));
-eventShareButtons.forEach((button) => {
-  button.addEventListener("click", async () => {
-    const card = button.closest(".news-card");
-    const title = card?.dataset.eventTitle || card?.querySelector("h3")?.textContent || "Noticia escolar";
-    const url = window.location.href;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text: title, url });
-        showToast("Noticia compartida.");
-      } catch {
-        showToast("Compartir cancelado.");
-      }
-    } else {
-      await navigator.clipboard?.writeText(`${title} - ${url}`);
-      showToast("Enlace copiado al portapapeles.");
-    }
-  });
-});
-
-applyNewsFilter(activeNewsFilter);
-
+const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
 const chatMessages = document.querySelector("#chat-messages");
 const quickQuestions = document.querySelectorAll("[data-question]");

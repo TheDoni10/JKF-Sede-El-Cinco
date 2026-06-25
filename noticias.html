@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="site-header"><nav class="nav" aria-label="Navegacion principal"><a class="brand" href="index.html"><img class="brand-logo" src="assets/img/logo/Logo.JFK.png" alt="Logo Institucion Educativa John F Kennedy" /><span><strong>John F Kennedy</strong><span>Sede El Cinco</span></span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button><div class="nav-links" id="site-menu"><a href="index.html">Inicio</a><a href="nosotros.html">Nosotros</a><a href="noticias.html">Noticias</a><a href="galeria.html">Galeria</a><a href="personero.html">Personero</a><a href="chat.html">Chat IA</a><a href="contacto.html">Contacto</a><a class="nav-action" href="/portal">Portal Estudiantes</a></div></nav></header>
+    <header class="site-header"><nav class="nav" aria-label="Navegacion principal"><a class="brand" href="index.html"><img class="brand-logo" src="assets/img/logo/Logo.JFK.png" alt="Logo Institucion Educativa John F Kennedy" /><span><strong>John F Kennedy</strong><span>Sede El Cinco</span></span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button><div class="nav-links" id="site-menu"><a href="index.html">Inicio</a><a href="nosotros.html">Nosotros</a><a href="noticias.html">Noticias</a><a href="galeria.html">Galeria</a><a href="personero.html">Personero</a><a href="chat.html">Chat IA</a><a href="contacto.html">Contacto</a></div></nav></header>
 
     <main class="page-shell">
       <section class="page-hero compact reveal">
@@ -15,28 +15,55 @@
         <h1>Vida escolar en movimiento</h1>
         <p class="lead">Actividades, comunicados y momentos importantes para estudiantes, familias y docentes.</p>
       </section>
-<section class="section news-grid">
-  <article class="news-card reveal event-card" data-event-date="2026-05-30" data-event-title="Entrega de boletines" data-event-description="Evaluamos para seguir creciendo juntos con estudiantes, familias y docentes.">
+      <section class="section news-toolbar reveal" aria-label="Buscar noticias">
+        <div class="news-search-wrap">
+          <label class="sr-only" for="news-search">Buscar noticias</label>
+          <input id="news-search" class="news-search" type="search" placeholder="Buscar por titulo, categoria o fecha" autocomplete="off" />
+          <span class="search-icon">🔎</span>
+        </div>
+        <div class="news-filter-bar" role="tablist" aria-label="Filtrar noticias">
+          <button class="filter-pill is-active news-filter-pill" type="button" data-filter="Todas">Todas</button>
+          <button class="filter-pill news-filter-pill" type="button" data-filter="Academico">Academico</button>
+          <button class="filter-pill news-filter-pill" type="button" data-filter="Comunidad">Comunidad</button>
+          <button class="filter-pill news-filter-pill" type="button" data-filter="Institucional">Institucional</button>
+          <button class="filter-pill news-filter-pill" type="button" data-filter="Cultura">Cultura</button>
+          <button class="filter-pill news-filter-pill" type="button" data-filter="Deporte">Deporte</button>
+        </div>
+      </section>
+      <section class="section news-featured reveal" aria-label="Noticia destacada">
+        <div class="featured-card">
+          <span class="eyebrow">Destacado</span>
+          <h2>Semana cultural: celebra el talento escolar</h2>
+          <p class="featured-copy">Nuestro evento de arte y cultura reune la energia creativa de toda la institucion para inspirar a estudiantes, familias y docentes.</p>
+          <div class="featured-actions">
+            <button class="button ghost" type="button" id="featured-share">Compartir</button>
+            <a class="button" href="#" id="featured-view">Ver eventos</a>
+          </div>
+        </div>
+      </section>
+      <section class="section news-grid" id="news-events">
+  <article class="news-card reveal event-card" data-event-date="2026-05-30" data-event-category="Academico" data-event-title="Entrega de boletines" data-event-description="Evaluamos para seguir creciendo juntos con estudiantes, familias y docentes.">
     <img src="assets/img/noticias/Aviso.png" alt="Entrega de boletines" class="news-card-img" loading="lazy" />
-    <div class="news-body"><div class="tag-row"><span class="tag">Academico</span><time datetime="2026-05-30">30 May 2026</time></div><h3>Entrega de boletines</h3><p>Evaluamos para seguir creciendo juntos con estudiantes, familias y docentes.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button></div></div>
+    <div class="news-body"><div class="tag-row"><span class="tag">Academico</span><time datetime="2026-05-30">30 May 2026</time></div><h3>Entrega de boletines</h3><p>Evaluamos para seguir creciendo juntos con estudiantes, familias y docentes.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button><button class="share-button" type="button" aria-label="Compartir evento">Compartir</button></div></div>
   </article>
-  <article class="news-card reveal event-card" data-event-date="2026-06-05" data-event-title="Reunion de padres de familia" data-event-description="Un espacio para dialogar, resolver inquietudes y trabajar en equipo por el proceso escolar.">
+  <article class="news-card reveal event-card" data-event-date="2026-06-05" data-event-category="Comunidad" data-event-title="Reunion de padres de familia" data-event-description="Un espacio para dialogar, resolver inquietudes y trabajar en equipo por el proceso escolar.">
     <img src="assets/img/noticias/Aviso.png" alt="Reunion de padres de familia" class="news-card-img" loading="lazy" />
-    <div class="news-body"><div class="tag-row"><span class="tag">Comunidad</span><time datetime="2026-06-05">5 Jun 2026</time></div><h3>Reunion de padres de familia</h3><p>Un espacio para dialogar, resolver inquietudes y trabajar en equipo por el proceso escolar.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button></div></div>
+    <div class="news-body"><div class="tag-row"><span class="tag">Comunidad</span><time datetime="2026-06-05">5 Jun 2026</time></div><h3>Reunion de padres de familia</h3><p>Un espacio para dialogar, resolver inquietudes y trabajar en equipo por el proceso escolar.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button><button class="share-button" type="button" aria-label="Compartir evento">Compartir</button></div></div>
   </article>
-  <article class="news-card reveal event-card" data-event-date="2026-06-13" data-event-title="Izada de bandera" data-event-description="Honramos nuestros valores, simbolos y el sentido de pertenencia por nuestra institucion.">
+  <article class="news-card reveal event-card" data-event-date="2026-06-13" data-event-category="Institucional" data-event-title="Izada de bandera" data-event-description="Honramos nuestros valores, simbolos y el sentido de pertenencia por nuestra institucion.">
     <img src="assets/img/noticias/Aviso.png" alt="Izada de bandera" class="news-card-img" loading="lazy" />
-    <div class="news-body"><div class="tag-row"><span class="tag">Institucional</span><time datetime="2026-06-13">13 Jun 2026</time></div><h3>Izada de bandera</h3><p>Honramos nuestros valores, simbolos y el sentido de pertenencia por nuestra institucion.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button></div></div>
+    <div class="news-body"><div class="tag-row"><span class="tag">Institucional</span><time datetime="2026-06-13">13 Jun 2026</time></div><h3>Izada de bandera</h3><p>Honramos nuestros valores, simbolos y el sentido de pertenencia por nuestra institucion.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button><button class="share-button" type="button" aria-label="Compartir evento">Compartir</button></div></div>
   </article>
-  <article class="news-card reveal event-card" data-event-date="2026-06-20" data-event-title="Semana cultural" data-event-description="Celebramos el talento, la creatividad y las expresiones artisticas de nuestra comunidad educativa.">
+  <article class="news-card reveal event-card" data-event-date="2026-06-20" data-event-category="Cultura" data-event-title="Semana cultural" data-event-description="Celebramos el talento, la creatividad y las expresiones artisticas de nuestra comunidad educativa.">
     <img src="assets/img/noticias/Aviso.png" alt="Semana cultural" class="news-card-img" loading="lazy" />
-    <div class="news-body"><div class="tag-row"><span class="tag">Cultura</span><time datetime="2026-06-20">20 Jun 2026</time></div><h3>Semana cultural</h3><p>Celebramos el talento, la creatividad y las expresiones artisticas de nuestra comunidad educativa.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button></div></div>
+    <div class="news-body"><div class="tag-row"><span class="tag">Cultura</span><time datetime="2026-06-20">20 Jun 2026</time></div><h3>Semana cultural</h3><p>Celebramos el talento, la creatividad y las expresiones artisticas de nuestra comunidad educativa.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button><button class="share-button" type="button" aria-label="Compartir evento">Compartir</button></div></div>
   </article>
-  <article class="news-card reveal event-card" data-event-date="2026-06-27" data-event-title="Torneo interclases" data-event-description="Una jornada para vivir el deporte, el companerismo y la sana competencia.">
+  <article class="news-card reveal event-card" data-event-date="2026-06-27" data-event-category="Deporte" data-event-title="Torneo interclases" data-event-description="Una jornada para vivir el deporte, el companerismo y la sana competencia.">
     <img src="assets/img/noticias/Aviso.png" alt="Torneo interclases" class="news-card-img" loading="lazy" />
-    <div class="news-body"><div class="tag-row"><span class="tag">Deporte</span><time datetime="2026-06-27">27 Jun 2026</time></div><h3>Torneo interclases</h3><p>Una jornada para vivir el deporte, el companerismo y la sana competencia.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button></div></div>
+    <div class="news-body"><div class="tag-row"><span class="tag">Deporte</span><time datetime="2026-06-27">27 Jun 2026</time></div><h3>Torneo interclases</h3><p>Una jornada para vivir el deporte, el companerismo y la sana competencia.</p><div class="event-actions"><span class="countdown-badge" data-countdown>Calculando...</span><button class="calendar-button" type="button" data-calendar>Guardar fecha</button><button class="share-button" type="button" aria-label="Compartir evento">Compartir</button></div></div>
   </article>
 </section>
+<p class="news-empty-state" hidden>No se encontraron noticias con esos criterios. Intenta otra palabra clave o filtro.</p>
 
       <section class="section live-news-section reveal" aria-labelledby="live-news-title">
         <div class="section-header">
